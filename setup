@@ -1,0 +1,9 @@
+#!/bin/bash 
+
+if [-z "$(which lynx)"]; then
+    echo Need to install lynx.
+    exit 1
+fi
+
+ln -s "$PWD" "$HOME/.config/lynx"
+ls -l ~/.config/lynx
