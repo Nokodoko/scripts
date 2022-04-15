@@ -7,7 +7,7 @@ dmenu='dmenu -m 0 -fn VictorMono:size=20 -nf green -nb black -nf green -sb blue'
 dun='dunstify -h int:value:'
 
 #make list
-aws iam list-users | grep -i username | sed s/,// | sed s/\"//g | awk '{print $2}' > ~/fifo/f &
+aws iam list-users | grep -i username | sed "s/,//;s/\"//g" | awk '{print $2}' > ~/fifo/f &
 
 val=$(cat ~/fifo/f | ${dmenu})
 
