@@ -1,4 +1,4 @@
-#!/bin/bash 
-#do default action
-#dunstctl action
+#!/BIN/BASH 
+#DO DEFAULT ACTION
+#DUNSTCTL ACTION
 dunstctl context

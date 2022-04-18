@@ -1,42 +1,47 @@
-#!/bin/bash
+#!/BIN/BASH
 
-#variables
+#VARIABLES
 RC=$?
+
+#NOTIFIERS
 NS=notify-send
 DMENU='dmenu -m 0 -fn VictorMono:size=20 -nf green -nb black -nf green -sb blue'
-SERVICE=$(cat ~/capacity/repos/scripts/bin/repos | ${DMENU} -p "Staging Token for")
-DIR=$(echo "${SERVICE}" | sed "s/staging.*//")
-FILE=$(find ~/capacity/repo/dev -type f | rg -i secrets | ${DMENU} -p "Locate File")
-TIX=$(echo " " | ${DMENU} -p "Enter FULL ticket Number")
 DUN='dunstify -h int:value:'
 
-#making token and allowing for k8s to exec into pod and make token
+#DIRECTORIES AND FILES
+BASE=~/capacity/repos/dev/
+SERVICE=$(find ${BASE} -type f | rg "secrets.yaml" | xargs dirname  | awk -F / '{print $9}' | uniq | ${DMENU} -p  "Select staging token:")
+DIR=$(find ${BASE} -type d | rg helm | rg ${SERVICE} | sed -n 1p)/${SERVICE}
+FILE=$(find ~/capacity/repo/dev -type f | rg -i secrets | ${DMENU} -p "Locate File")
+TIX=$(echo " " | ${DMENU} -p "Enter FULL ticket Number")
+
+#MAKING TOKEN AND ALLOWING FOR K8S TO EXEC INTO POD AND MAKE TOKEN
 MAKETOKEN=$(stagingToken $1 | rg -i -A 1 core | sed -n 2p)
 sleep 1
 
-#User information
+#USER INFORMATION
 ${DUN}0 "Making..."
 
-#call token
+#CALL TOKEN
 MAKETOKEN ${SERVICE}
 
-#User information 
+#USER INFORMATION 
 ${DUN}100 "Token Created"
 
-#navigate to branch 
+#NAVIGATE TO BRANCH 
 cd ${DIR}
 
-#git checkout ticket name
+#GIT CHECKOUT TICKET NAME
 git checkout -b ${TIX}
 
-#edit secrets file
+#EDIT SECRETS FILE
 helm secrets dec
 sleep 1
 sed -i "s/ey.*/${MAKETOKEN}/" ${FILE}
 helm secrets enc
 sleep 1
 
-#testing secrets modification
+#TESTING SECRETS MODIFICATION
 if [ ${RC} -eq 0 ]; then
     continue 
 else
@@ -44,11 +49,11 @@ else
     exit 1
 fi
 
-#git boilerplate to commit and push
+#GIT BOILERPLATE TO COMMIT AND PUSH
 git commit -am "Updated ${TIX} Staging API tokens"
 git push --set-upstream origin ${TIX}
 
-#testing git push
+#TESTING GIT PUSH
 if [ ${RC} -eq 0 ]; then
     ${DUN}100 "Pushed to gitlab!"
 else

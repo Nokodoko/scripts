@@ -1,4 +1,4 @@
-#!/bin/bash 
+#!/BIN/BASH 
 
 $pow=$(pidof dunst && killall dunst
 dunst &)

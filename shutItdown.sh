@@ -5,7 +5,7 @@ RC=$?
 ns=notify-send 
 
 #shutting down the computer
-${ns} "Brb!"
+${ns} "Later!"
 echo "kmonad ~/.config/kmonad/config.kbd &" >> ~/.zshenv 
 sleep .5
 shutdown -h now
