@@ -1,16 +1,16 @@
 #!/bin/bash 
 
-#variables
+#VARIABLES
 RC=$?
 ns=notify-send 
 
-#shutting down the computer
+#SHUTTING DOWN THE COMPUTER
 ${ns} "Later!"
 echo "kmonad ~/.config/kmonad/config.kbd &" >> ~/.zshenv 
 sleep .5
 shutdown -h now
 
-#testing if it's still alive
+#TESTING IF IT'S STILL ALIVE
 if [ ${RC} -eq 0 ]; then
     continue
 else

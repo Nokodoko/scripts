@@ -1,6 +1,6 @@
-#!/BIN/BASH
+#!/bin/bash
 
-#VARIABLES
+#VARIABES
 RESPONSE_CODE=$?
 ns=notify-send
 dmenu='dmenu -m 0 -fn VictorMono:size=20 -nf green -nb black -nf green -sb blue'
@@ -16,7 +16,7 @@ makeToken(){
 #USER INFORMATION
 ${dun}0 "Making..."
 
-#CALL TOKEN
+#CAL TOKEN
 makeToken ${repos}
 
 #USER INFORMATION 

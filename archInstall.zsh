@@ -1,4 +1,4 @@
-#!/BIN/BASH 
+#!/bin/bash 
 
 #USERNAME (CHANGE VARIABLE HERE)
 UN=${UN}
