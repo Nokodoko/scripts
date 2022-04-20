@@ -1,3 +1,3 @@
-#!/BIN/BASH 
+#!/bin/bash 
 
 dunstctl history-pop
