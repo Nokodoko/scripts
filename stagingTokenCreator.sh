@@ -4,11 +4,9 @@
 # export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
 
 #VARIABLES
-RC=$?
-
 #NOTIFIERS / BLUE SELECTOR IS FOR STAGING
 NS=notify-send
-DMENU='dmenu -m 0 -fn VictorMono:size=20 -nf green -nb black -nf green -sb blue'
+DMENU='dmenu -m 0 -fn VictorMono:size=17 -nf cyan -nb black -nf cyan -sb blue'
 DUN='dunstify -h int:value:'
 
 #DIRECTORIES AND FILES
@@ -28,10 +26,10 @@ git pull ${DIR}
 git checkout -b ${TIX}
 
 #TESTING GIT CHECKOUT
-if [ ${RC} -eq 0 ]; then
+if [ '$?' -eq 0 ]; then
     ${NS} "Successful Checkout"
 else
-    ${NS} -u critical "I didn't reach the targeted destination!! ${RC}"
+    ${NS} -u critical "I didn't reach the targeted destination!! '$?'"
     exit 1
 fi
 
@@ -51,10 +49,10 @@ sleep 3
 ${DUN}0 "Making..."
 
 ##TESTING
-if [ ${RC} -eq 0 ]; then
+if [ '$?' -eq 0 ]; then
     ${DUN}100 "Token Created"
 else
-    ${NS} -u critical "I didn't reach the targeted destination!! ${RC}"
+    ${NS} -u critical "I didn't reach the targeted destination!! '$?'"
     exit 1
 fi
 
@@ -63,11 +61,11 @@ fi
 #DECRYPTING FILE
 helm secrets dec ${FILE}
 ##TESTING
-if [ ${RC} -eq 0 ]; then
+if [ '$?' -eq 0 ]; then
     ${DUN}50 "File Decrypted"
     sleep 2
 else
-    ${NS} -u critical "I didn't decrypt the file ${RC}"
+    ${NS} -u critical "I didn't decrypt the file '$?'"
     exit 1
 fi
 
@@ -75,20 +73,20 @@ fi
 sed -i "s/TOKEN:.*/${MAKETOKEN}/" ${FILE}
 
 ##TESTING
-if [ ${RC} -eq 0 ]; then
+if [ '$?' -eq 0 ]; then
     ${DUN}50 "Updated token in ${FILE}"
 else
-    ${NS} -u critical "I didn't correctly upgrade the ${FILE} ${RC}"
+    ${NS} -u critical "I didn't correctly upgrade the ${FILE} '$?'"
     exit 1
 fi
 
 #RE-ENCRYPT FILE
 helm secrets enc ${FILE}
 ##TESTING
-if [[ ${RC} -eq 0 ]]; then
+if [[ '$?' -eq 0 ]]; then
     ${DUN}50 "Successfully Re-encrypted ${FILE}"
 else
-    ${NS} -u critical "I didn't reach the targeted destination!! ${RC}"
+    ${NS} -u critical "I didn't reach the targeted destination!! '$?'"
     exit 1
 fi
 sleep 2
@@ -98,10 +96,10 @@ sleep 2
 git commit -am "Updated ${TIX} Staging API tokens"
 
 #TESTING
-if [ ${RC} -eq 0 ]; then
+if [ '$?' -eq 0 ]; then
     ${DUN}75 "Commited branch ${TIX}"
 else
-    ${NS} -u critical "I didn not successfully commit to branch ${TIX} ${RC}"
+    ${NS} -u critical "I didn not successfully commit to branch ${TIX} '$?'"
     exit 1
 fi
 
@@ -109,7 +107,7 @@ fi
 git push --set-upstream origin ${TIX} | rg https | xargs google-chrome
 
 #TESTING GIT PUSH
-if [ ${RC} -eq 0 ]; then
+if [ '$?' -eq 0 ]; then
     ${DUN}100 "Pushed to gitlab!"
     exit 0
 else

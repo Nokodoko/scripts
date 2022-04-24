@@ -3,7 +3,7 @@
 #VARIABES
 RESPONSE_CODE=$?
 ns=notify-send
-dmenu='dmenu -m 0 -fn VictorMono:size=20 -nf green -nb black -nf green -sb blue'
+dmenu='dmenu -m 0 -fn VictorMono:size=17 -nf cyan -nb black -nf cyan -sb blue'
 repos=$(cat ~/capacity/repos/scripts/bin/repos | ${dmenu} -p "Staging Token")
 dun='dunstify -h int:value:'
 

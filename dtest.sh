@@ -4,6 +4,6 @@ $pow=$(pidof dunst && killall dunst
 dunst &)
 $pow
 
-notify-send "messages"
+dunstify -u low "messages"
 
 

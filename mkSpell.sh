@@ -1,18 +1,16 @@
 #!/bin/bash
 
 #CONSTANTS
-ns=notify-send
-dmenu='dmenu -m 0 -fn VictorMono:size=20 -nf green -nb black -nf green -sb black'
-dun='dunstify -h int:value:' 
-
+DMENU='dmenu -m 0 -fn VictorMono:size=17 -nf cyan -nb black -nf cyan -sb black'
+DFY='dunstify -u low'
 #GIVE SPELL NAME
-SPELL=$(echo "                 " | dmenu -p "Name your spell")
+SPELL=$(echo "                 " | ${DMENU} -p "Name your spell")
 
 #OPEN EDITOR OR EXIT WITH NOTIFICATION
-if [ -z $1 ]; then
-    ${ns} "Make magic"
+if [ "$?" -eq 0 ]; then
+    ${DFY} "make magic"
     exec kitty -e nvim ~/scripts/${SPELL}.sh
 else
-    ${ns} "Nothing was Created"
+    ${DFY} "Nothing was Created"
     exit 1
 fi

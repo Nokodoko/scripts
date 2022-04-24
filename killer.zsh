@@ -3,7 +3,7 @@
 #globals
 ns=notify-send
 RESPONSE_CODE=$?
-dmenu='dmenu -m 0 -fn VictorMono:size=20 -nf green -nb black -nf white -sb red'
+dmenu='dmenu -m 0 -fn VictorMono:size=17 -nf cyan -nb black -nf white -sb red'
 dun='dunstify -u low'
 
 #get pid

@@ -3,18 +3,15 @@
 #CONSTANTS
 RC=$?
 ns=notify-send
-dmenu='dmenu -m 0 -fn VictorMono:size=20 -nf green -nb black -nf green -sb black'
-dun='dunstify -h int:value:'
+dmenu='dmenu -m 0 -fn VictorMono:size=17 -nf cyan -nb black -nf cyan -sb black'
 
 #VARIABLES
-SPELL=$(ls ~/scripts | dmenu)
-
-
+SPELL=$(ls ~/scripts | ${dmenu})
 #TEST AND OPEN EDITOR WITH NEW SPELL NAME
-if [ -z $1 ]; then
-    ${ns} "${SPELL}"
+if [ "$?" -eq 0 ]; then
+    ${ns} -u low "${SPELL}"
     exec kitty -e nvim ~/scripts/${SPELL}
 else
-    ${ns} "Nothing changed"
+    ${ns} -u low "Nothing changed"
     exit 1
 fi

@@ -1,7 +1,6 @@
 #!/bin/bash 
 
 #variables
-RC=$?
 ns=notify-send 
 
 #shutting down the computer
@@ -11,8 +10,6 @@ sleep .5
 reboot
 
 #testing if it's still alive
-if [ ${RC} -eq 0 ]; then
-    continue
-else
-    ${ns} "I'm still here!"
+if [ "$?" -ne 0 ]; then
+    ${ns} -u low "I'm still here!"
 fi
