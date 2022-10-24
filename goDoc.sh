@@ -9,7 +9,7 @@ DUNN='dunstify -u normal'
 LIB=$(echo "            " | ${DMENU} -p "Find your library")
 
 #FIND TYPE OR FUNCTION
-go doc $LIB | rg func\|type | ${DMENU} -p "Find your type or function" | xargs -0 tee ${DUNL} clip.sh
+go doc $LIB | rg func\|type | ${DMENU} -p "Find your type or function" | xargs -0 ${DUNL} 
 #if [ "$?" -eq 0 ]; then
 #    $LIB 
 #else

@@ -1,7 +1,6 @@
 #!/bin/bash
 
 #CONSTANTS
-RC=$?
 ns=notify-send
 dmenu='dmenu -m 0 -fn VictorMono:size=17 -nf cyan -nb black -nf cyan -sb black'
 

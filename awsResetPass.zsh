@@ -12,7 +12,7 @@ aws iam list-users | grep -i username | sed "s/,//;s/\"//g" | awk '{print $2}' >
 val=$(cat ~/fifo/f | ${dmenu})
 
 #RESET PASSWORD
-resetpassword.zsh ${val}
+resetpassword.zsh ${val} 
 
 
 #TESTING

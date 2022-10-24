@@ -6,7 +6,7 @@ dun='dunstify -h int:value:'
 
 #make new aws password
 function resetpass() {
-    genPass > newpass.txt; 
+    ~/scripts/genPass > newpass.txt; 
     aws iam update-login-profile --user-name ${name} --password $(cat newpass.txt);
     cat newpass.txt | xclip -sel c
     rm newpass.txt

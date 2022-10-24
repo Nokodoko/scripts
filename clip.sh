@@ -1,2 +1,3 @@
-func Clearenv()
+#!/bin/bash
 
+xclip -sel c
