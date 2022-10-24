@@ -1,0 +1,3 @@
+#!/bin/bash
+dunstify -u critical "Kube Job Failed"
+google-chrome https://app.datadoghq.com/monitors/61806136?q=kube_cronjob%3Astaging-e2e-cron-sla%2F

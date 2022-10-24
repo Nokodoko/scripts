@@ -1,0 +1,3 @@
+#!/bin/bash
+dunstify -u critical "Pods Not Ready"
+google-chrome https://app.datadoghq.com/monitors/62289696

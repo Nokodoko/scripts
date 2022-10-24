@@ -1,0 +1,3 @@
+#!/bin/bash
+dunstify -u critical "Disk Free is Low"
+google-chrome https://app.datadoghq.com/monitors/68890862?q=yyo

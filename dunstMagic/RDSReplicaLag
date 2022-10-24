@@ -1,0 +1,6 @@
+#!/bin/bash
+dunstify -u critical "RDS Replica Lag"
+google-chrome https://app.datadoghq.com/monitors/67418468?q=dbinstanceidentifier%3Aai-prod-mariadb-replica-003yyyyyy
+#!/bin/bash
+dunstify -u critical "RDS Replica Lag"
+google-chrome https://app.datadoghq.com/monitors/67418468

@@ -1,0 +1,3 @@
+#!/bin/bash
+dunstify -u critical "Kube Cron Job Failed"
+google-chrome https://app.datadoghq.com/monitors/62291290?q=kube_cronjob

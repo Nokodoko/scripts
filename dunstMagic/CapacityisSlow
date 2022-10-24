@@ -1,0 +1,3 @@
+#!/bin/bash
+google-chrome "https://app.datadoghq.com/monitors/69543230"
+dunstify -u critical "Capacity is Slow!!"

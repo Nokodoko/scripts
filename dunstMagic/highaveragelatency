@@ -1,0 +1,3 @@
+#!/bin/bash
+google-chrome "https://app.datadoghq.com/monitors/65163286"
+dunstify -u critical "high average latency"

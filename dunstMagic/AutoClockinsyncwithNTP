@@ -1,0 +1,3 @@
+#!/bin/bash
+dunstify -u critical "Auto Clock in sync with NTP"
+google-chrome https://app.datadoghq.com/monitors/56993181

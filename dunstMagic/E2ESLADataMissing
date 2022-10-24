@@ -1,0 +1,3 @@
+#!/bin/bash
+dunstify -u critical "E2E SLA Data Missing"
+google-chrome https://app.datadoghq.com/monitors/68188408?q=%2A

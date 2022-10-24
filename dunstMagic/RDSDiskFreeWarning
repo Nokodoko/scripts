@@ -1,0 +1,3 @@
+#!/bin/bash
+dunstify -u critical "RDS Disk Free Warning"
+google-chrome https://app.datadoghq.com/monitors/67408327

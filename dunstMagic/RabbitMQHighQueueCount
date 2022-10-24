@@ -1,0 +1,3 @@
+#!/bin/bash
+dunstify -u critical "RabbitMQ High Queue Count"
+google-chrome https://app.datadoghq.com/monitors/64363290

@@ -1,0 +1,3 @@
+#!/bin/bash
+dunstify -u critical "RDS High CPU Warning"
+google-chrome https://app.datadoghq.com/monitors/67409513

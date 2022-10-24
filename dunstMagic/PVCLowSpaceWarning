@@ -1,0 +1,3 @@
+#!/bin/bash
+dunstify -u critical "PVC Low Space Warning"
+google-chrome https://app.datadoghq.com/monitors/66051217?q=%2A

@@ -1,0 +1,3 @@
+#!/bin/bash
+google-chrome "https://app.datadoghq.com/monitors/62318124"
+dunstify -u critical "High 5xx Reponse Rate"

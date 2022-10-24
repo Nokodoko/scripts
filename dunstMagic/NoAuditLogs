@@ -1,0 +1,3 @@
+#!/bin/bash
+dunstify -u critical "No Audit Logs"
+google-chrome https://app.datadoghq.com/monitors/69542980?to_ts=1651093780000&from_ts=1651092580000&eval_ts=1651093780000

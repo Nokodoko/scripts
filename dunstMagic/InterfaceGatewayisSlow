@@ -1,0 +1,3 @@
+#!/bin/bash
+dunstify -u critical "Interface Gateway is Slow"
+google-chrome https://app.datadoghq.com/monitors/67419743?q=kube_service%3Awatchdog-sql-exporter

@@ -1,0 +1,3 @@
+#!/bin/bash
+dunstify -u critical "RabbitMQ Memory is Critically High"
+google-chrome https://app.datadoghq.com/monitors/64364206?q=%2FR

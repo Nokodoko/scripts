@@ -1,0 +1,3 @@
+#!/bin/bash
+dunstify -u critical "Multiple Restarts"
+google-chrome https://app.datadoghq.com/monitors/62221011?q=%2FMu

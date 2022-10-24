@@ -1,0 +1,3 @@
+#!/bin/bash
+dunstify -u critical "VPN Site to Site Down"
+google-chrome https://app.datadoghq.com/monitors/68194511

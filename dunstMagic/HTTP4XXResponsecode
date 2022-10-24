@@ -1,0 +1,3 @@
+#!/bin/bash
+dunstify -u critical "HTTP 4XX Response Code"
+google-chrome https://app.datadoghq.com/monitors/67445433?q=service%3Alollipop%2Cstatus%3A400

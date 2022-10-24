@@ -1,0 +1,16 @@
+#!/bin/bash
+
+NS=notify-send
+DFY='dunstify'
+BASE=~/capacity/repos/dev/ 
+
+FILE=$(fd -td -tf tf $BASE | fzf) 
+
+#TESTING
+if [ "$?" -eq 0 ]; then
+    $DFY "Fix This"
+    nvim $FILE
+else
+    $DFY "No Service Selected"
+    exit 1
+fi

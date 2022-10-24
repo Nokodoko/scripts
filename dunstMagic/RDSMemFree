@@ -1,0 +1,3 @@
+#!/bin/bash
+dunstify -u critical "RDS Mem Free"
+google-chrome https://app.datadoghq.com/monitors/67410915?from_ts=1651026541769&to_ts=1651112941769&eval_ts=1651112941769

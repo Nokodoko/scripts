@@ -1,0 +1,92 @@
+#!/bin/bash
+
+
+touch "InterfaceGatewayisSlow" && echo "#!/bin/bash" >> InterfaceGatewayisSlow
+echo "dunstify -u critical \"Interface Gateway is Slow\"" >> InterfaceGatewayisSlow
+echo "google-chrome https://app.datadoghq.com/monitors/67419743?q=kube_service%3Awatchdog-sql-exporter" >> InterfaceGatewayisSlow 
+touch "NoAuditLogs" && echo "#!/bin/bash" >> NoAuditLogs
+echo "dunstify -u critical \"No Audit Logs\"">> NoAuditLogs
+echo "google-chrome https://app.datadoghq.com/monitors/69542980?to_ts=1651093780000&from_ts=1651092580000&eval_ts=1651093780000" >> NoAuditLogs
+touch "RDSReplicaLag" && echo "#!/bin/bash" >> RDSReplicaLag
+echo "dunstify -u critical \"RDS Replica Lag\"">> RDSReplicaLag
+echo "google-chrome https://app.datadoghq.com/monitors/67418468?q=dbinstanceidentifier%3Aai-prod-mariadb-replica-003yyyyyy" >> RDSReplicaLag
+touch "KubeCronJobFailed" && echo "#!/bin/bash" >> KubeCronJobFailed
+echo "dunstify -u critical \"Kube Cron Job Failed\"">> KubeCronJobFailed
+echo "google-chrome https://app.datadoghq.com/monitors/62291290?q=kube_cronjob" >> KubeCronJobFailed
+touch "DiskFreeisLow" && echo "#!/bin/bash" >> DiskFreeisLow
+echo "dunstify -u critical \"Disk Free is Low\"">> DiskFreeisLow
+echo "google-chrome https://app.datadoghq.com/monitors/68890862?q=yyo" >> DiskFreeisLow 
+touch "E2ESLADataMissing" && echo "#!/bin/bash" >> E2ESLADataMissing
+echo "dunstify -u critical \"E2E SLA Data Missing\"">> E2ESLADataMissing
+echo "google-chrome https://app.datadoghq.com/monitors/68188408?q=%2A" >> E2ESLADataMissing
+touch "HTTP4XXResponsecode" && echo "#!/bin/bash" >> HTTP4XXResponsecode
+echo "dunstify -u critical \"HTTP 4XX Response Code\"">> HTTP4XXResponsecode
+echo "google-chrome https://app.datadoghq.com/monitors/67445433?q=serv"ice%3Alollipop%2Cstatus%3A400 >> HTTP4XXResponsecode
+touch "KubeJobFailed" && echo "#!/bin/bash" >> KubeJobFailed
+echo "dunstify -u critical \"Kube Job Failed\"">> KubeJobFailed
+echo "google-chrome https://app.datadoghq.com/monitors/61806136?q=kube_"cronjob%3Astaging-e2e-cron-sla%2F >> KubeJobFailed
+touch "KubeHpaScaling" && echo "#!/bin/bash" >> KubeHpaScaling
+echo "dunstify -u critical \"Kube Hpa Scaling\"">> KubeHpaScaling
+echo "google-chrome https://app.datadoghq.com/monitors/67427605?q=%2A" >> KubeHpaScaling
+touch "PVCLowSpaceWarning" && echo "#!/bin/bash" >> PVCLowSpaceWarning
+echo "dunstify -u critical \"PVC Low Space Warning\"">> PVCLowSpaceWarning
+echo "google-chrome https://app.datadoghq.com/monitors/66051217?q=%2A" >> PVCLowSpaceWarning
+touch "PodNotStarting" && echo "#!/bin/bash" >> PodNotStarting
+echo "dunstify -u critical \"Pod Not Starting\"">> PodNotStarting
+echo "google-chrome https://app.datadoghq.com/monitors/62221745" >> PodNotStarting
+touch "PodsNotReady" && echo "#!/bin/bash" >> PodsNotReady
+echo "dunstify -u critical \"Pods Not Ready\"">> PodsNotReady
+echo "google-chrome https://app.datadoghq.com/monitors/62289696" >> PodsNotReady
+touch "RDSDiskFreeWarning" && echo "#!/bin/bash" >> RDSDiskFreeWarning
+echo "dunstify -u critical \"RDS Disk Free Warning\"">> RDSDiskFreeWarning
+echo "google-chrome https://app.datadoghq.com/monitors/67408327" >> RDSDiskFreeWarning
+touch "RDSHighCPUWarning" && echo "#!/bin/bash" >> RDSHighCPUWarning
+echo "dunstify -u critical \"RDS High CPU Warning\"">> RDSHighCPUWarning
+echo "google-chrome https://app.datadoghq.com/monitors/67409513" >> RDSHighCPUWarning
+touch "RDSMemFree" && echo "#!/bin/bash" >> RDSMemFree
+echo "dunstify -u critical \"RDS Mem Free\"">> RDSMemFree
+echo "google-chrome https://app.datadoghq.com/monitors/67410915?from_ts=1651026541769&to_ts=1651112941769&eval_ts=1651112941769" >> RDSMemFree
+touch "RDSReplicaLag" && echo "#!/bin/bash" >> RDSReplicaLag
+echo "dunstify -u critical \"RDS Replica Lag\"">> RDSReplicaLag
+echo "google-chrome https://app.datadoghq.com/monitors/67418468" >> RDSReplicaLag
+touch "RabbitMQHighQueueCount" && echo "#!/bin/bash" >> RabbitMQHighQueueCount
+echo "dunstify -u critical \"RabbitMQ High Queue Count\"">> RabbitMQHighQueueCount
+echo "google-chrome https://app.datadoghq.com/monitors/64363290" >> RabbitMQHighQueueCount
+touch "RabbitMQMemoryisCriticallyHigh" && echo "#!/bin/bash" >> RabbitMQMemoryisCriticallyHigh
+echo "dunstify -u critical \"RabbitMQ Memory is Critically High\"">> RabbitMQMemoryisCriticallyHigh
+echo "google-chrome https://app.datadoghq.com/monitors/64364206?q=%2FR" >> RabbitMQMemoryisCriticallyHigh
+touch "RabbitMQNLPEngineQueueCount" && echo "#!/bin/bash" >> RabbitMQNLPEngineQueueCount
+echo "dunstify -u critical \"RabbitMQ NLP Engine Queue Count\"">> RabbitMQNLPEngineQueueCount
+echo "google-chrome https://app.datadoghq.com/monitors/64364719" >> RabbitMQNLPEngineQueueCount
+touch "RabbitMQ-File_update_queue" && echo "#!/bin/bash" >> RabbitMQ-File_update_queue
+echo "dunstify -u critical \"RabbitMQ-File_update_queue\"">> RabbitMQ-File_update_queue
+echo "google-chrome https://app.datadoghq.com/monitors/64362241" >> RabbitMQ-File_update_queue
+touch "SSLCertificateExpiring" && echo "#!/bin/bash" >> SSLCertificateExpiring
+echo "dunstify -u critical \"SSL Certificate Expiring\"">> SSLCertificateExpiring
+echo "google-chrome https://app.datadoghq.com/monitors/66052077" >> SSLCertificateExpiring
+touch "VPNSitetoSiteDown" && echo "#!/bin/bash" >> VPNSitetoSiteDown
+echo "dunstify -u critical \"VPN Site to Site Down\"">> VPNSitetoSiteDown
+echo "google-chrome https://app.datadoghq.com/monitors/68194511" >> VPNSitetoSiteDown
+touch "VeleroBackupFailures" && echo "#!/bin/bash" >> VeleroBackupFailures
+echo "dunstify -u critical \"Velero Backup Failures\"">> VeleroBackupFailures
+echo "google-chrome https://app.datadoghq.com/monitors/66051847" >> VeleroBackupFailures
+touch "AutoClockinsyncwithNTP" && echo "#!/bin/bash" >> AutoClockinsyncwithNTP
+echo "dunstify -u critical \"Auto Clock in sync with NTP\"">> AutoClockinsyncwithNTP
+echo "google-chrome https://app.datadoghq.com/monitors/56993181" >> AutoClockinsyncwithNTP
+touch "MultipleRestarts" && echo "#!/bin/bash" >> MultipleRestarts
+echo "dunstify -u critical \"Multiple Restarts\"">> MultipleRestarts
+echo "google-chrome https://app.datadoghq.com/monitors/62221011?q=%2FMu" >> MultipleRestarts
+touch "highaveragelatency" && echo "#!/bin/bash" >> highaveragelatency
+echo "google-chrome \"https://app.datadoghq.com/monitors/65163286\"" >> highaveragelatency
+echo "dunstify -u critical \"high average latency\"" >> highaveragelatency
+touch "http5xxishigh" && echo "#!/bin/bash" >> http5xxishigh
+echo "google-chrome \"https://app.datadoghq.com/monitors/62318124\"" >> http5xxishigh
+echo "dunstify -u critical \"High 5xx Reponse Rate\"" >> http5xxishigh
+touch "CapacityisSlow" && echo "#!/bin/bash" >> CapacityisSlow
+echo "google-chrome \"https://app.datadoghq.com/monitors/69543230\"" >> CapacityisSlow
+echo "dunstify -u critical \"Capacity is Slow!!\"" >> CapacityisSlow
+touch "ServiceTicketing" && echo "#!/bin/bash" >> ServiceTicketing
+echo "google-chrome \"https://app.datadoghq.com/monitors/71155025\"" >> ServiceTicketing
+echo "dunstify -u critical \"A Service is slow!!\"" >> ServiceTicketing
+
+chmod +x *
