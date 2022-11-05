@@ -1,28 +1,27 @@
 #!/bin/bash
 
 dmenu='dmenu -m 0 -fn VictorMono:size=20 -nf green -nb black -nf green -sb black'
-dun='dunstify -h int:value:'
+DUN='dunstify -h int:value:'
 tm='terminal-notifier'
 
-PODNAME=$(kubectl get po -A | awk '{print $1, $2, $4}' | fzf | awk '{print $1, $2}')
-CONTAINER=$(kubectl get po -n ${PODNAME} -o jsonpath='{range .spec.containers[*]}{.name}{"\n"}{end}' | fzf)
+JOBNAME=$(kubectl get job -A | awk '{print $1, $2, $4}' | fzf | awk '{print $1, $2}')
 
-kubectl logs -n ${PODNAME} -c ${CONTAINER}
+kubectl edit job -n ${JOBNAME} 
    if [ "$?" -eq 0 ]; then
-       ${dun} "SELCTED!"
+       ${DUN} "SELCTED!"
 #       ${tm} "SELCTED!"
    else
-       dunstify -u critical "No Pod Selected"
+       DUNstify -u critical "No Pod Selected"
        #${tm} "No Pod Selected"
        exit 1
    fi
 
 #kubectl logs -n $(kubectl get po -A | awk '{print $1, $2, $4}' | fzf | awk '{print $1, $2}') 
 #   if [ "$?" -eq 0 ]; then
-#       ${dun} "SELCTED!"
+#       ${DUN} "SELCTED!"
 ##       ${tm} "SELCTED!"
 #   else
-#       dunstify -u critical "No Pod Selected"
+#       DUNstify -u critical "No Pod Selected"
 #       #${tm} "No Pod Selected"
 #       exit 1
 #   fi
