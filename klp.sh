@@ -7,7 +7,8 @@ tm='terminal-notifier'
 PODNAME=$(kubectl get po -A | awk '{print $1, $2, $4}' | fzf | awk '{print $1, $2}')
 CONTAINER=$(kubectl get po -n ${PODNAME} -o jsonpath='{range .spec.containers[*]}{.name}{"\n"}{end}' | fzf)
 
-kubectl logs -n ${PODNAME} -c ${CONTAINER}
+#--logging-format=json
+kubectl logs -n ${PODNAME} -c ${CONTAINER} 
    if [ "$?" -eq 0 ]; then
        ${dun} "SELCTED!"
 #       ${tm} "SELCTED!"
