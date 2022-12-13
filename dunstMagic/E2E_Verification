@@ -1,0 +1,11 @@
+#!/bin/bash
+dunstify -u normal "Cron Job Paused, Beginning Restart"
+kitty -e kubectl patch cronjob -n default e2e-cron-sla -p '{spec:{suspend:true}}' && sleep 310 && kubectl patch cronjob -n default e2e-cron-sla -p '{spec:{suspend:false}}'
+
+if [ $? -ne 0 ]; then
+    dunstify -u normal "Cron Restarted"
+    exit 0
+else
+    dunstify -u critical "Cron Failed to Restart"
+    exit 1
+fi

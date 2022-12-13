@@ -7,7 +7,7 @@ dmenu='dmenu -m 0 -fn VictorMono:size=17 -nf cyan -nb black -nf white -sb red'
 dun='dunstify -u low'
 
 #get pid
-process=$(ps -u ${USER} -o pid,%mem,%cpu,comm | sed -n '1!p' | sort -b -k2 -r | awk '{print $1" "$4}' | ${dmenu} -p "Kill me" | awk '{print $1}')
+process=$(ps -u ${USER} -o pid,%mem,%cpu,comm | sed -n '1!p' | sort -b -k2 -r | awk '{print $1" "$4}' | rofi -theme Arc-Dark -dmenu -p "Kill me" | awk '{print $1}')
 
 #kill process
 kill ${process}

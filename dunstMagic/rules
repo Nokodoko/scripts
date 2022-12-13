@@ -88,5 +88,9 @@ echo "dunstify -u critical \"Capacity is Slow!!\"" >> CapacityisSlow
 touch "ServiceTicketing" && echo "#!/bin/bash" >> ServiceTicketing
 echo "google-chrome \"https://app.datadoghq.com/monitors/71155025\"" >> ServiceTicketing
 echo "dunstify -u critical \"A Service is slow!!\"" >> ServiceTicketing
+touch "E2E_Verification" && echo "#!/bin/bash" >> E2E_Verification
+echo "kitty -e kubectl patch cronjob -n default e2e-cron-sla -p '{"spec":{"suspend":true}}' && sleep 310 && kubectl patch cronjob -n default e2e-cron-sla -p '{"spec":{"suspend":false}}'
+" >> E2E_Verification
+echo "dunstify -u critical \"A Service is slow!!\"" >> E2E_Verification
 
 chmod +x *

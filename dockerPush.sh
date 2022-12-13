@@ -2,6 +2,6 @@
 
 for dir in */; do
     cd "$dir"
-    git pull
+    docker build .
 	cd ..
 done
