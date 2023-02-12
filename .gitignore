@@ -3,3 +3,5 @@ genPass
 vpn
 capServer
 mypass.zsh
+tokenCheckProd.sh
+tokenCheckStage.sh
