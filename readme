@@ -1,0 +1,30 @@
+Following the instructions above, log into the vpn server and log in as root with:
+```
+sudo su -
+```
+
+For a list of the commands below and how to use them type (there will
+be a printout of instructions to the terminal)
+```
+MFA
+```
+
+The list of commands availble are as folllows:
+
+RESET MFA
+1. Reset Secret MFA user (enable) : secretMfa <first.last> (tested)
+2. Reset Key MFA user (disable) : keyMfa <first.last> (untested - not needed yet)
+
+ENABLE/DISABLE MFA
+1. Single User Enable : mfaEnable <first.last> (untested - not needed yet)
+2. Single User Disable : mfaDisable <first.last> (untested - not needed yet)
+
+UNLOCK ACCOUNTS
+1. Unlock Accounts : unlockAccount <first.last> (untested as it is not needed
+there is a bit of nested error handling going on)
+
+GLOBAL COMMANDS
+1. Global Enable : globalEnable (untested - not needed yet)
+2. Global Disable : globalDisable (untested - not needed yet)
+
+

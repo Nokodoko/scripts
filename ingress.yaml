@@ -1,0 +1,3 @@
+  - name: wildcard.sites.staging.capacity.com
+    host: "*.my.staging.capacity.com"
+    ingressClass: articles-external

@@ -1,0 +1,56 @@
+#!/bin/bash
+
+#check for dependencies
+if ! command -v fzf &>/dev/null
+then
+    echo "installing fzf"
+    brew install fzf
+fi
+
+if ! command -v rg &>/dev/null
+then
+    echo "installing ripgrep"
+    brew install ripgrep
+fi
+read -p "Insert a New site name: " FQDN
+echo $FQDN
+
+STARNAME=$(aws acm list-certificates | rg Domain | awk -F : '{ print $2 }' | sed 's/"//g' | fzf --prompt="Add to which domain?  " | sed 's/*//g')
+SITENAME=$(aws acm list-certificates | rg Domain | awk -F : '{ print $2 }' | sed 's/"//g' | fzf --prompt="For the regex: ")
+CERTARN=$(aws acm list-certificates | rg -B1 $STARNAME | rg arn | sed -n 1p | awk '{ print $2 }' | sed 's/"//g;s/,//g')
+
+aws acm describe-certificate --certificate-arn ${CERTARN} > ~/certs.json
+
+jq '.Certificate.DomainValidationOptions[] | [.DomainName, .ResourceRecord.Name, .ResourceRecord.Value]' ~/certs.json | \
+    sed 's/\[//g;s/\]//g;s/"//g;s/,//' > ~/subDoms
+
+SUBDOMAIN=$(jq '.Certificate.DomainValidationOptions[] | [.DomainName]' ~/certs.json | sed 's/\[//g;s/\]//g;s/"//g;s/,//;/^$/d' > ~/subDoms)
+SUBDOMOUT=$(cat ~/subDoms)
+
+RNAME=$(jq '.Certificate.DomainValidationOptions[] | [.DomainName, .ResourceRecord.Name]' ~/certs.json | \
+        sed 's/\[//g;s/\]//g;s/"//g;s/,//;/^$/d' > ~/rname)
+cat ~/rname
+
+RVALUE=$(jq '.Certificate.DomainValidationOptions[] | [.DomainName, .ResourceRecord.Value]' ~/certs.json | \
+        sed 's/\[//g;s/\]//g;s/"//g;s/,//;/^$/d' > ~/rvalue) 
+cat ~/rvalue
+
+    aws acm request-certificate \
+        --domain-name ${SITENAME} \
+        --validation-method DNS
+        --subject-alternative-names ${SUBDOMOUT} $FQDN > ~/newArn
+        if [ "$?" -eq  0 ]; then
+        echo "Cert updated with ${FQDN}, check https://us-east-1.console.aws.amazon.com/acm/home?region=us-east-1#/certificates/list-certificates
+        for details on your new certificate."
+        exit 0
+    else
+        echo "CERT DID NOT UPDATE.
+        AWS ACM command failed: Check the ~/subDoms file, 
+        or ensure that you have a fully-qualified-domain-name"
+        exit 1
+    fi
+
+rm ~/rvalue
+rm ~/rname
+rm ~/subDoms
+rm ~/certs.json

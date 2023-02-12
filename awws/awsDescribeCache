@@ -1,0 +1,4 @@
+#!/bin/bash
+
+aws elasticache describe-events --source-identifier $(~/scripts/awws/awsElasticId) --source-type cache-cluster
+

@@ -1,0 +1,61 @@
+#!/bin/bash
+#Dependencies
+#1. FZF
+
+#(HELPER SCRIPTGS)
+
+
+
+echo "Please consider the following as arguments required to complete this rollback:
+(this is an interactive program however you will need to know the following)
+1. RESTORETIME
+2. SOURCE
+3. TARGET
+4. PARAMGROUP
+5. SUBNETNAME
+6. OPTIONGROUPNAME"
+
+sleep 2s
+
+read -p "Enter a restore time (FORMAT:+%Y-%M-%DT%H:%M%:%SZ)" ${RESTORETIME}
+
+echo "The restore time will be ${RESTORETIME}"
+
+#if [ user-select ]; then
+#    continue
+#else
+    #read -p "Re-enter your desired restore time (FORMAT:+%Y-%M-%DT%H:%M%:%SZ)" ${RESTORETIME}
+    #echo "The restore time will be ${RESTORETIME}"
+    #continue
+#fi
+
+ns=notify-send
+dun='dunstify -h int:value:'
+
+#dbinstanceIdentifier
+SOURCE=''
+#dbinstanceIdentifier
+TARGET=''
+#awsDescribeDB|'use grep/sed/or jq (challenge yourself to get better with jq)'
+PARAMGROUP=''
+#awsDescribeDB|'use grep/sed/or jq (challenge yourself to get better with jq)'
+SUBNETNAME=''
+#awsDescribeDB|'use grep/sed/or jq (challenge yourself to get better with jq)'
+OPTIONGROUPNAME=''
+
+aws rds restore-db-instance-to-point-in-time \
+  --restore-time ${RESTORETIME} \
+  --source-db-instance-identifier ${SOURCE} \
+  --target-db-instance-identifier ${TARGET} \
+  --db-subnet-group-name ${SUBNETNAME} \
+  --no-multi-az \
+  --no-publicly-accessible \
+  --option-group-name ${OPTIONGROUPNAME} \
+  --db-parameter-group-name ai-mariadb10-5-params
+  #--enable-cloudwatch-logs-exports \'[\"error\",\"general\",\"slowquery\"]\' \
+
+if [ $? -eq 0 ]; then
+    "Completed rollback of ${SOURCE} to ${TARGET}"
+else
+    "${SOURCE} ROLLBACK FAILED!"
+fi
