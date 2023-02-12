@@ -1,3 +1,0 @@
-#!/bin/bash
-
-aws rds describe-events | rg -i -A5 $(~/scripts/awsListDbInstanceIdentifiers.sh)
