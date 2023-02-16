@@ -1,0 +1,19 @@
+#!/bin/bash
+#
+#ns=notify-send
+#dmenu='dmenu -m 0 -fn VictorMono:size=20 -nf green -nb black -nf green -sb black'
+#dun='dunstify -h int:value:' 
+set -x
+
+f(){
+     fzf --preview 'bat --style=numbers --color=always --line-range :500 {}'
+}s
+
+function hinstall(){
+    helm upgrade --install --kube-context $(cat ~/helmInfo/context.md | fzf) --namespace $(bat ~/helmInfo/helmSpeed.md | awk '{ print $2, $1 }' | fzf | awk '{ print $1 }') --version 4.2.5 -f $(fd -tf values.yaml . | f)
+}
+
+hinstall
+
+
+jq '.LoadBalancerDescriptions[] | .LoadBalancerName .LoadBalancerName .ListenerDescriptions[] | .SSLCertificate'

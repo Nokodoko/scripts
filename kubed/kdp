@@ -8,7 +8,7 @@ LIST=$(kubectl get po -A | awk '{print $1, $2}' | fzf)
 
 kubectl describe pod -n ${LIST}
    if [ "$?" -eq 0 ]; then
-       ${DUN} "SELCTED!"
+       ${dun} "SELCTED!"
    else
        dunstify -u critical "No Pod Selected"
        exit 1
