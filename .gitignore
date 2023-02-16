@@ -5,3 +5,4 @@ capServer
 mypass.zsh
 tokenCheckProd.sh
 tokenCheckStage.sh
+sqlLog
