@@ -4,7 +4,7 @@ ns=notify-send
 dmenu='dmenu -m 0 -fn VictorMono:size=20 -nf green -nb black -nf green -sb black'
 dun='dunstify -h int:value:'
 
-LIST=$(kubectl get po -A | awk '{print $1, $2}' | fzf)
+LIST=$(kubectl get po -A | awk '{print $1, $2}' | fzf --layout reverse)
 
 kubectl describe pod -n ${LIST}
    if [ "$?" -eq 0 ]; then

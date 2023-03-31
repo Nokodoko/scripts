@@ -1,2 +1,2 @@
 #!/bin/bash 
-feh --bg-scale ~/Pictures/system.png
+feh --bg-scale ~/Pictures/ai1.png

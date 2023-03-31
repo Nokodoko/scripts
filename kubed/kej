@@ -4,7 +4,7 @@ dmenu='dmenu -m 0 -fn VictorMono:size=20 -nf green -nb black -nf green -sb black
 DUN='dunstify -h int:value:'
 tm='terminal-notifier'
 
-JOBNAME=$(kubectl get job -A | awk '{print $1, $2, $4}' | fzf | awk '{print $1, $2}')
+JOBNAME=$(kubectl get job -A | awk '{print $1, $2, $4}' | fzf --layout reverse | awk '{print $1, $2}')
 
 kubectl edit job -n ${JOBNAME} 
    if [ "$?" -eq 0 ]; then
@@ -16,7 +16,7 @@ kubectl edit job -n ${JOBNAME}
        exit 1
    fi
 
-#kubectl logs -n $(kubectl get po -A | awk '{print $1, $2, $4}' | fzf | awk '{print $1, $2}') 
+#kubectl logs -n $(kubectl get po -A | awk '{print $1, $2, $4}' | fzf --layout reverse | awk '{print $1, $2}') 
 #   if [ "$?" -eq 0 ]; then
 #       ${DUN} "SELCTED!"
 ##       ${tm} "SELCTED!"

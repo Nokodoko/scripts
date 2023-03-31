@@ -4,9 +4,9 @@ dmenu='dmenu -m 0 -fn VictorMono:size=20 -nf green -nb black -nf green -sb black
 dun='dunstify -h int:value:'
 tm='terminal-notifier'
 
-INGRESS=$(kubectl get ingress -A | awk '{print $1, $2, $4}' | fzf | awk '{print $1, $2}')
-#CONTAINER=$(kubectl get ing -n ${INGRESS} -o jsonpath='{range .spec.containers[*]}{.name}{"\n"}{end}' | fzf)
-#CONTAINER=$(kubectl get po -n ${INGRESS} -o jsonpath='{range .spec.containers[*]}{.name}{"\n"}{end}' | fzf)
+INGRESS=$(kubectl get ingress -A | awk '{print $1, $2, $4}' | fzf --layout reverse | awk '{print $1, $2}')
+#CONTAINER=$(kubectl get ing -n ${INGRESS} -o jsonpath='{range .spec.containers[*]}{.name}{"\n"}{end}' | fzf --layout reverse)
+#CONTAINER=$(kubectl get po -n ${INGRESS} -o jsonpath='{range .spec.containers[*]}{.name}{"\n"}{end}' | fzf --layout reverse)
 
 kubectl logs -n ${INGRESS} #-c ${CONTAINER}
    if [ "$?" -eq 0 ]; then

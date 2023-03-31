@@ -4,7 +4,7 @@ ns=notify-send
 dmenu='dmenu -m 0 -fn VictorMono:size=20 -nf green -nb black -nf green -sb black'
 dun='dunstify -h int:value:'
 
-LIST=$(cat ~/helmInfo/nodeTypeList.md |fzf)
+LIST=$(cat ~/helmInfo/nodeTypeList.md |fzf --layout reverse)
 
 kubectl get node --selector type=${LIST} -o wide
    if [ "$?" -eq 0 ]; then

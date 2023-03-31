@@ -4,7 +4,12 @@ NS=notify-send
 DFY='dunstify'
 BASE=~/capacity/repos/dev/ 
 
-FILE=$(fd -td -tf tf $BASE | fzf) 
+function f() {
+    fzf --layout reverse --preview 'bat --style=numbers --color=always --line-range :500 {}'
+}
+
+pushd $BASE
+nvim $(fd -tf | f)
 
 #TESTING
 if [ "$?" -eq 0 ]; then

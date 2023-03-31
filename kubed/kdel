@@ -4,5 +4,5 @@
 #dmenu='dmenu -m 0 -fn VictorMono:size=20 -nf green -nb black -nf green -sb black'
 #dun='dunstify -h int:value:'
 
-kubectl delete jobs -n $(kubectl get jobs -A | fzf | awk '{print $1, $2}')              
+kubectl delete jobs -n $(kubectl get jobs -A | fzf --layout reverse | awk '{print $1, $2}')              
 
