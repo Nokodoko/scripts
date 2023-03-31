@@ -7,3 +7,4 @@ tokenCheckProd.sh
 tokenCheckStage.sh
 sqlLog
 schemas.sh
+dbase
