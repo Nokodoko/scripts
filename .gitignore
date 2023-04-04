@@ -6,5 +6,6 @@ mypass.zsh
 tokenCheckProd.sh
 tokenCheckStage.sh
 sqlLog
+sqlQuery
 schemas.sh
 dbase
