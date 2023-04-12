@@ -1,0 +1,30 @@
+#!/bin/bash
+
+
+#add getops() -q
+#case
+#    q)
+#        ;;
+#esac
+
+function capColor() {
+    TEXT=$1
+    gum style --foreground "#118DFF" "$TEXT"
+}
+
+function redColor() {
+    TEXT=$1
+    gum style --foreground "#D82C20" "$TEXT"
+}
+
+
+gum style \
+    --border double \
+    --padding "1" \
+    "Capacity Databases"
+
+echo "Choose $(redColor "permission") level"
+TYPE=$(gum choose "readOnly" "dba")
+DATABASE=$(gum filter < ~/scripts/sqlLog/dbList.md)
+
+~/scripts/sqlLog/$TYPE/$DATABASE
