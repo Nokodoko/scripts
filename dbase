@@ -23,6 +23,21 @@ gum style \
     --padding "1" \
     "Capacity Databases"
 
+while getopts 'q' OPTION; do
+    case "$OPTION" in
+        q)
+    echo "Choose $(redColor "permission") level $(capColor "for query")"
+    TYPE=$(gum choose "readOnly" "dba")
+    DATABASE=$(gum filter < ~/scripts/sqlQuery/dbList.md)
+    ~/scripts/sqlQuery/$TYPE/$DATABASE
+            ;;
+        *)
+            echo "Invalid flag"
+            exit 1
+            ;;
+    esac
+done
+
 echo "Choose $(redColor "permission") level"
 TYPE=$(gum choose "readOnly" "dba")
 DATABASE=$(gum filter < ~/scripts/sqlLog/dbList.md)
