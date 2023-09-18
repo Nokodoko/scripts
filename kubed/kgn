@@ -1,16 +1,20 @@
 #!/bin/bash
 
-ns=notify-send
-dmenu='dmenu -m 0 -fn VictorMono:size=20 -nf green -nb black -nf green -sb black'
-dun='dunstify -h int:value:'
+TN='terminal-notifier'
 
-LIST=$(cat ~/helmInfo/nodeTypeList.md |fzf --layout reverse)
+
+#function flist() {
+#    ARG="$@"
+#    fzf --layout reverse --border --border-label="$ARG" 
+#}
+ 
+LIST=$(cat ~/helmInfo/nodeTypeList.md | flist2 "NODES")
 
 kubectl get node --selector type=${LIST} -o wide
    if [ "$?" -eq 0 ]; then
-       ${dun} "SELCTED!"
+       echo "$LIST Node Selcected" | $TN
    else
-       dunstify -u critical "No Node Selected"
+       echo "No Node Selected" | $TN
        exit 1
    fi
 

@@ -1,18 +1,12 @@
 #!/bin/bash
 
-dmenu='dmenu -m 0 -fn VictorMono:size=20 -nf green -nb black -nf green -sb black'
-DUN='dunstify -h int:value:'
-tm='terminal-notifier'
+NODE=$(kubectl get node -A |flist "Edit Nodes"| awk '{print $1}')
 
-NODE=$(kubectl get node -A | awk '{print $1, $2, $4}' | fzf --layout reverse | awk '{print $1, $2}')
-
-kubectl edit node -n ${NODE} 
+kubectl edit node -n "${NODE}"
    if [ "$?" -eq 0 ]; then
-       ${DUN} "SELCTED!"
-#       ${tm} "SELCTED!"
+       echo "SELCTED $NODE!" | terminal-notifier
    else
-       DUNstify -u critical "No Pod Selected"
-       #${tm} "No Pod Selected"
+       echo "No Node Selected" | terminal-notifier
        exit 1
    fi
 

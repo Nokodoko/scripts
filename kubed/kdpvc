@@ -7,9 +7,9 @@ function flist() {
     fzf --layout reverse --border --border-label="$ARG" 
 }
 
-LIST=$(kubectl get po -A | awk '{print $1, $2}' | flist "Pod Description")
+LIST=$(kubectl get pvc -A | awk '{print $1, $2}' | flist "Persistent Volume Claim")
 
-kubectl describe pod -n ${LIST}
+kubectl describe pvc -n ${LIST}
    if [ "$?" -eq 0 ]; then
       echo "$LIST SELCTED!" | $TN
    else

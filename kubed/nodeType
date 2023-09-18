@@ -1,0 +1,4 @@
+#!/bin/bash
+
+#kubectl get no -o json | jq '.items[]|.metadata.labels.type'| sort | uniq | sed 's/"//g' | flist "Node Types"
+kubectl get no -o json | jq '.items[]|.metadata.labels.type'| sort | uniq | sed 's/"//g' | fzf --multi --reverse --border --border-label="Pick a Node Type"

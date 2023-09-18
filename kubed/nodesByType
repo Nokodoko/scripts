@@ -1,0 +1,11 @@
+#!/bin/bash
+
+#function type() {
+#    kubectl get no -l type=$(nodeType) | fzf --reverse --sync --border --border-label="Choose a Node to Cordon" | awk '{print $1}'
+#}
+
+function type() {
+    kubectl get no -l type=$(nodeType) | awk '{print $0}'| sort -k4nr | fzf --reverse --sync --border --border-label="Choose a Node to Cordon" | awk '{print $1}'
+}
+
+type

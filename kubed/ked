@@ -1,18 +1,14 @@
 #!/bin/bash
 
-dmenu='dmenu -m 0 -fn VictorMono:size=20 -nf green -nb black -nf green -sb black'
-DUN='dunstify -h int:value:'
 tm='terminal-notifier'
 
 DEPLOYMENT=$(kubectl get deploy -A | awk '{print $1, $2, $4}' | fzf --layout reverse | awk '{print $1, $2}')
 
 kubectl edit deploy -n ${DEPLOYMENT} 
    if [ "$?" -eq 0 ]; then
-       ${DUN} "SELCTED!"
-#       ${tm} "SELCTED!"
+       echo "SELCTED!" | $tm
    else
-       DUNstify -u critical "No Pod Selected"
-       #${tm} "No Pod Selected"
+       echo "No Pod Selected" | $tm
        exit 1
    fi
 

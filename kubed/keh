@@ -1,0 +1,16 @@
+#!/bin/bash
+
+DUN='dunstify -h int:value:'
+tm='terminal-notifier'
+
+HPA=$(kubectl get hpa -A | awk '{print $1, $2, $4}' | flist "HPA -- Select your Scaler"| awk '{print $1, $2}')
+
+kubectl edit hpa -n ${HPA} 
+   if [ "$?" -eq 0 ]; then
+       ${DUN} "SELCTED!"
+#       ${tm} "SELCTED!"
+   else
+       DUNstify -u critical "No Scaler Selected"
+       #${tm} "No Pod Selected"
+       exit 1
+   fi

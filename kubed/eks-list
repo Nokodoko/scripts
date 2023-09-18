@@ -1,0 +1,3 @@
+#!/bin/bash
+
+aws eks list-clusters | jq '.clusters[]' | sed 's/"//g' | flist "EKS Clusters"

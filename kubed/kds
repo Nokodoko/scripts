@@ -1,15 +1,13 @@
 #!/bin/bash
 
-dmenu='dmenu -m 0 -fn VictorMono:size=20 -nf green -nb black -nf green -sb black'
-dun='dunstify -h int:value:'
-
-LIST=$(kubectl get svc -A | awk '{print $1 ,  $2}' | fzf --layout reverse)
+TN='terminal-notifier'
+LIST=$(kubectl get svc -A | awk '{print $1 ,  $2}' | flist "Describe Services")
 
 kubectl describe svc -n ${LIST}
    if [ "$?" -eq 0 ]; then
-       ${dun} "Service Found!"
+       echo "$LIST Service Found!" | $TN
    else
-       dunstify -u critical "No Service Selected"
+       echo "No Service Selected" | $TN
        exit 1
    fi
 

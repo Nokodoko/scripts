@@ -1,19 +1,24 @@
 #!/bin/bash
+set -x
 
-dmenu='dmenu -m 0 -fn VictorMono:size=20 -nf green -nb black -nf green -sb black'
-dun='dunstify -h int:value:'
-tm='terminal-notifier'
+function tm() {
+    ARG=$@
+    echo "$@" | terminal-notifier 
+}
+function flist() {
+    POD=$@
+    fzf --reverse --border --border-label="$POD"
+}
 
-INGRESS=$(kubectl get ingress -A | awk '{print $1, $2, $4}' | fzf --layout reverse | awk '{print $1, $2}')
+INGRESS=$(kubectl get ingress -A | awk '{print $1, $2, $4}' | $(flist "Pod Ingresses")| awk '{print $1, $2}')
 #CONTAINER=$(kubectl get ing -n ${INGRESS} -o jsonpath='{range .spec.containers[*]}{.name}{"\n"}{end}' | fzf --layout reverse)
 #CONTAINER=$(kubectl get po -n ${INGRESS} -o jsonpath='{range .spec.containers[*]}{.name}{"\n"}{end}' | fzf --layout reverse)
 
 kubectl logs -n ${INGRESS} #-c ${CONTAINER}
    if [ "$?" -eq 0 ]; then
-       ${dun} "SELCTED!"
+       $(tm "Ingress Selected!")
 #       ${tm} "SELCTED!"
    else
-       dunstify -u critical "No Pod Selected"
-       #${tm} "No Pod Selected"
+       $(tm "Ingress Not Found")
        exit 1
    fi

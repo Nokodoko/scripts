@@ -1,0 +1,4 @@
+#!/bin/bash
+
+kubectl patch deploy -n kube-system cluster-autoscaler -p '{"spec":{"replicas":0}}'
+echo "Disabling AutoScaler" | terminal-notifier
