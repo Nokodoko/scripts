@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+argo app sync $(argo app list | awk '{print $1}' | fzf)

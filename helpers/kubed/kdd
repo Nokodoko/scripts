@@ -1,0 +1,19 @@
+
+#!/bin/bash
+
+ns=notify-send
+dmenu='dmenu -m 0 -fn VictorMono:size=20 -nf green -nb black -nf green -sb black'
+dun='dunstify -h int:value:'
+
+LIST=$(kubectl get daemonset | awk '{print $1}' | fzf --layout reverse)
+
+kubectl describe daemonset ${LIST}
+   if [ "$?" -eq 0 ]; then
+       ${dun} "SELCTED!"
+   else
+       dunstify -u critical "No Daemonset Selected"
+       exit 1
+   fi
+
+
+#kubectl describe node ${list}

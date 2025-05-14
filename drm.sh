@@ -1,5 +1,5 @@
 #!/bin/bash
 
-CID=$(docker ps | fzf | awk '{print $1}')
+CID=$(docker images | fzf | awk '{print $3}')
 
-docker rm -f ${CID} 
+docker rmi -f ${CID}

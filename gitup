@@ -1,7 +1,21 @@
 #!/bin/bash
 
-for dir in */; do
-    cd "$dir"
-    git pull
-	cd ..
-done
+function gitup() {
+    for dir in */; do
+        cd "$dir" || exit
+        git pull
+      cd ..
+    done
+}
+
+export -f git_pull
+find . -maxdepth 1 -mindepth 1 -type d -print0 | parallel -0 -j5 gitup
+
+##!/bin/bash
+#git_pull() {
+#    pushd "$1" || exit
+#    git pull
+#    popd "$(basename)" || exit
+#}
+#export -f git_pull
+#fd -t d -d 1 -x bash -c "git_pull '$0'" \;

@@ -1,0 +1,119 @@
+{
+    "DBInstances": [
+        {
+            "DBInstanceIdentifier": "ai-prod-replica-analytics-003",
+            "DBInstanceClass": "db.m5.8xlarge",
+            "Engine": "mariadb",
+            "DBInstanceStatus": "available",
+            "MasterUsername": "jane",
+            "Endpoint": {
+                "Address": "ai-prod-replica-analytics-003.cnodckl1ayzm.us-east-1.rds.amazonaws.com",
+                "Port": 3306,
+                "HostedZoneId": "Z2R2ITUGPM61AM"
+            },
+            "AllocatedStorage": 1649,
+            "InstanceCreateTime": "2023-04-14T02:53:04.040000+00:00",
+            "PreferredBackupWindow": "10:00-10:30",
+            "BackupRetentionPeriod": 1,
+            "DBSecurityGroups": [],
+            "VpcSecurityGroups": [
+                {
+                    "VpcSecurityGroupId": "sg-51ee3925",
+                    "Status": "active"
+                }
+            ],
+            "DBParameterGroups": [
+                {
+                    "DBParameterGroupName": "ai-mariadb10-5-rw-slave-params",
+                    "ParameterApplyStatus": "in-sync"
+                }
+            ],
+            "AvailabilityZone": "us-east-1b",
+            "DBSubnetGroup": {
+                "DBSubnetGroupName": "aisoftware-rds-subnet",
+                "DBSubnetGroupDescription": "Managed by Terraform",
+                "VpcId": "vpc-3fcbe647",
+                "SubnetGroupStatus": "Complete",
+                "Subnets": [
+                    {
+                        "SubnetIdentifier": "subnet-8b0f87a4",
+                        "SubnetAvailabilityZone": {
+                            "Name": "us-east-1a"
+                        },
+                        "SubnetOutpost": {},
+                        "SubnetStatus": "Active"
+                    },
+                    {
+                        "SubnetIdentifier": "subnet-ccb0e687",
+                        "SubnetAvailabilityZone": {
+                            "Name": "us-east-1b"
+                        },
+                        "SubnetOutpost": {},
+                        "SubnetStatus": "Active"
+                    },
+                    {
+                        "SubnetIdentifier": "subnet-6eb43833",
+                        "SubnetAvailabilityZone": {
+                            "Name": "us-east-1c"
+                        },
+                        "SubnetOutpost": {},
+                        "SubnetStatus": "Active"
+                    },
+                    {
+                        "SubnetIdentifier": "subnet-501a5234",
+                        "SubnetAvailabilityZone": {
+                            "Name": "us-east-1d"
+                        },
+                        "SubnetOutpost": {},
+                        "SubnetStatus": "Active"
+                    }
+                ]
+            },
+            "PreferredMaintenanceWindow": "fri:06:00-fri:07:00",
+            "PendingModifiedValues": {},
+            "LatestRestorableTime": "2023-04-27T01:10:00+00:00",
+            "MultiAZ": false,
+            "EngineVersion": "10.5.16",
+            "AutoMinorVersionUpgrade": false,
+            "ReadReplicaDBInstanceIdentifiers": [],
+            "LicenseModel": "general-public-license",
+            "OptionGroupMemberships": [
+                {
+                    "OptionGroupName": "ai-mariadb10-5-options",
+                    "Status": "in-sync"
+                }
+            ],
+            "PubliclyAccessible": false,
+            "StorageType": "gp2",
+            "DbInstancePort": 0,
+            "StorageEncrypted": true,
+            "KmsKeyId": "arn:aws:kms:us-east-1:632808888887:key/1565223b-7a86-4942-b0d4-684642b2fa67",
+            "DbiResourceId": "db-OCZCPHA6NXUBCD4X4JZWAN2TJU",
+            "CACertificateIdentifier": "rds-ca-2019",
+            "DomainMemberships": [],
+            "CopyTagsToSnapshot": false,
+            "MonitoringInterval": 60,
+            "EnhancedMonitoringResourceArn": "arn:aws:logs:us-east-1:632808888887:log-group:RDSOSMetrics:log-stream:db-OCZCPHA6NXUBCD4X4JZWAN2TJU",
+            "MonitoringRoleArn": "arn:aws:iam::632808888887:role/rds-monitoring-role",
+            "DBInstanceArn": "arn:aws:rds:us-east-1:632808888887:db:ai-prod-replica-analytics-003",
+            "IAMDatabaseAuthenticationEnabled": false,
+            "PerformanceInsightsEnabled": true,
+            "PerformanceInsightsKMSKeyId": "arn:aws:kms:us-east-1:632808888887:key/1565223b-7a86-4942-b0d4-684642b2fa67",
+            "PerformanceInsightsRetentionPeriod": 7,
+            "DeletionProtection": false,
+            "AssociatedRoles": [],
+            "TagList": [
+                {
+                    "Key": "datawarehouse/source-name",
+                    "Value": "main-replica"
+                },
+                {
+                    "Key": "DatabaseClass",
+                    "Value": "ReplicaAnalytics"
+                }
+            ],
+            "CustomerOwnedIpEnabled": false,
+            "ActivityStreamStatus": "stopped"
+        }
+    ]
+}

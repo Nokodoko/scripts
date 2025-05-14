@@ -1,18 +1,18 @@
 #!/bin/bash
 
-TN='terminal-notifier'
+NOTIFIER='xargs -I {} dunstify -u low "{}"'
 
 function flist() {
-    ARG="$@"
-    fzf --layout reverse --border --border-label="$ARG" 
+	ARG="$@"
+	fzf --layout reverse --border --border-label="$ARG"
 }
 
 LIST=$(kubectl get po -A | awk '{print $1, $2}' | flist "Pod Description")
 
 kubectl describe pod -n ${LIST}
-   if [ "$?" -eq 0 ]; then
-      echo "$LIST SELCTED!" | $TN
-   else
-       echo "No Pod Selected" | $TN
-       exit 1
-   fi
+if [ "$?" -eq 0 ]; then
+	echo "$LIST SELCTED!" | $NOTIFIER
+else
+	echo "No Pod Selected" | $NOTIFIER
+	exit 1
+fi

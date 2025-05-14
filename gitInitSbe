@@ -1,0 +1,15 @@
+#!/bin/bash
+DIR_NAME="$(basename $(pwd))"
+NAME="Chris Montgomery"
+EMAIL="chris@sbevision.com"
+
+git init --initial-branch=master
+git config --local user.name ${NAME}
+git config --local user.email ${EMAIL}
+git remote add origin https://git.ops.sbe-vision.com/chris/${DIR_NAME}.git
+git branch -M master
+
+touch README.md
+git add .
+git commit -m "Added README"
+git push -uf origin master

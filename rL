@@ -1,0 +1,3 @@
+#!/bin/bash
+
+gh repo list | awk '{print $1}' | flisty 'Repo List'

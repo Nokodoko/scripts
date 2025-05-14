@@ -1,0 +1,3 @@
+#!/bin/bash 
+
+ifconfig tun0 | grep 172 | cut -d: -f1 | awk '{print $2}'

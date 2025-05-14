@@ -5,9 +5,7 @@ ns=notify-send
 
 #SHUTTING DOWN THE COMPUTER
 ${ns} "Later!"
-echo "kmonad ~/.config/kmonad/config.kbd &" >> ~/.zshenv 
-echo "kmonad ~/.config/kmonad/widow.kbd &" >> ~/.zshenv 
-echo "kmonad ~/.config/kmonad/nuphy.kbd &" >> ~/.zshenv 
+echo "sudo kmonad ~/.config/kmonad/config.kbd &" >> ~/.zshenv 
 sleep .5
 sudo shutdown -h now
 

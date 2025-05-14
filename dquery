@@ -1,0 +1,29 @@
+#!/bin/bash
+set -x
+
+
+function capColor() {
+    TEXT=$1
+    gum style --foreground "#118DFF" "$TEXT"
+}
+
+function redColor() {
+    TEXT=$1
+    gum style --foreground "#D82C20" "$TEXT"
+}
+
+
+gum style \
+    --border double \
+    --padding "1" \
+    "Capacity Databases"
+
+echo "Choose $(redColor "permission") level"
+TYPE=$(gum choose "readOnly" "dba")
+DATABASE=$(gum filter < ~/scripts/sqlLog/dbList.md)
+
+function dquery() {
+    ~/scripts/sqlQuery/$TYPE/$DATABASE -e $@
+}
+
+dquery $@

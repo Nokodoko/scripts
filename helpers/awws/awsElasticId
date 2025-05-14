@@ -1,0 +1,7 @@
+#!/bin/bash
+#
+#ns=notify-send
+#dmenu='dmenu -m 0 -fn VictorMono:size=20 -nf green -nb black -nf green -sb black'
+#dun='dunstify -h int:value:'
+
+aws elasticache describe-cache-clusters | rg -i clusterid | awk '{print $2}' | sed 's/"//g;s/,//' | fzf

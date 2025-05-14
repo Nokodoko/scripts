@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+
+#COLORS
+function fsColor() {
+  TEXT=$1
+  gum style --foreground "#228B22" "$TEXT"
+}
+
+function redColor() {
+  TEXT=$1
+  gum style --foreground "#D82C20" "$TEXT"
+}
+
+gum style \
+  --border double \
+  --padding "1" \
+  "n0ko Databases"
+
+#FLAGS
+while getopts ':qmQ' OPTION; do
+  case "$OPTION" in
+  q)
+    echo "Choose $(redColor "permission") level $(fsColor "for query")"
+    TYPE=$(gum choose "readOnly" "dba" "master")
+    DATABASE=$(gum filter <~/scripts/sqlQuery/dbList.md)
+    ~/scripts/sqlQuery/$TYPE/$DATABASE
+    exit 0
+    ;;
+  m)
+    ~/scripts/sqlLog/main/main.sh
+    exit 0
+    ;;
+  Q)
+    ~/scripts/sqlQuery/main/main.sh
+    exit 0
+    ;;
+  *)
+    echo "Invalid flag"
+    exit 1
+    ;;
+  esac
+done
+
+#BASE PROGRAM
+echo "Choose $(fsColor "permission") level"
+TYPE=$(gum choose "readOnly" "dba" "master")
+DATABASE=$(gum filter <~/scripts/sqln0ko/dbList.md)
+
+~/scripts/sqln0ko/$TYPE/$DATABASE

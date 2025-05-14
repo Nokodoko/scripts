@@ -1,28 +1,38 @@
 #!/bin/bash
 TN='terminal-notifier'
 
-PODNAME=$(kubectl get po -A | awk '{print $1, $2, $4}' | fzf --layout reverse --border --border-label='Pod Logs'| awk '{print $1, $2}')
-CONTAINER=$(kubectl get po -n ${PODNAME} -o jsonpath='{range .spec.containers[*]}{.name}{"\n"}{end}' | fzf --layout reverse)
-
+PODNAME=$(kubectl get po | awk '{print $1, $2, $4}' | fzf --layout reverse --border --border-label='Pod Logs' | awk '{print $1, $2}')
+# PODNAME=$(kubectl get po -A | awk '{print $1, $2, $4}' | fzf --layout reverse --border --border-label='Pod Logs' | awk '{print $1, $2}')
+# CONTAINER=$(kubectl get po -n ${PODNAME} -o jsonpath='{range .spec.containers[*]}{.name}{"\n"}{end}' | fzf --layout reverse)
 
 #--logging-format=json
 #kubectl logs -n ${PODNAME} -c ${CONTAINER} -o json --tail=-1 --timestamps --follow  | jq -r 'map(tostring) | join(",")'
-kubectl logs -n ${PODNAME} -c ${CONTAINER} 
-   if [ "$?" -eq 0 ]; then
-       echo " $PODNAME Selected" | $TN
-#       ${tm} "SELCTED!"
-   else
-       echo "No Pod Selected" | $TN
-       #${tm} "No Pod Selected"
-       exit 1
-   fi
+# kubectl logs -n ${PODNAME} -c ${CONTAINER}
+# if [ "$?" -eq 0 ]; then
+# 	echo " $PODNAME Selected" | $TN
+# 	#       ${tm} "SELCTED!"
+# else
+# 	echo "No Pod Selected" | $TN
+# 	#${tm} "No Pod Selected"
+# 	exit 1
+# fi
 
-#kubectl logs -n $(kubectl get po -A | awk '{print $1, $2, $4}' | fzf --layout reverse | awk '{print $1, $2}') 
-#   if [ "$?" -eq 0 ]; then
-#       ${dun} "SELCTED!"
-##       ${tm} "SELCTED!"
-#   else
-#       dunstify -u critical "No Pod Selected"
-#       #${tm} "No Pod Selected"
-#       exit 1
-#   fi
+# kubectl clog -n ${PODNAME} -c ${CONTAINER}
+# if [ "$?" -eq 0 ]; then
+# 	echo " $PODNAME Selected" | $TN
+# 	#       ${tm} "SELCTED!"
+# else
+# 	echo "No Pod Selected" | $TN
+# 	#${tm} "No Pod Selected"
+# 	exit 1
+# fi
+
+stern ${PODNAME}
+if [ "$?" -eq 0 ]; then
+	echo " $PODNAME Selected" | $TN
+	#       ${tm} "SELCTED!"
+else
+	echo "No Pod Selected" | $TN
+	#${tm} "No Pod Selected"
+	exit 1
+fi

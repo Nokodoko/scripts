@@ -1,0 +1,12 @@
+#!/bin/bash
+
+#VARIABLE
+PODNAME=$(kubectl get po -A | awk '{print $1, $2, $4}' | fzf --layout reverse | awk '{print $1, $2}')
+CONTAINER=$(kubectl get po -n ${PODNAME} -o jsonpath='{range .spec.containers[*]}{.name}{"\n"}{end}' | fzf --layout reverse)
+
+#COMMAND
+function exec() {
+    kubectl exec -it  -c ${CONTAINER} -n ${PODNAME} -- /bin/bash
+}
+
+exec 

@@ -1,3 +1,2 @@
 #!/bin/bash
-echo -e 'power on\ndefault-agent\npair FD:BC:E8:54:F9:6D\nconnect FD:BC:E8:54:F9:6D\ntrust FD:BC:E8:54:F9:6D\nagent off\nquit' | bluetoothctl
-
+echo -e 'power on\ndefault-agent\npair DD:DA:50:D0:21:8D\nconnect DD:DA:50:D0:21:8D\ntrust DD:DA:50:D0:21:8D\nagent off\nquit' | bluetoothctl

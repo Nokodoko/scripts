@@ -1,0 +1,19 @@
+#!/bin/bash
+
+NOTIFIER='xargs -I {} dunstify -u low "{}"'
+FLISTY() {
+	ARG=$@
+	fzf --reverse --border --border-label="$ARG"
+}
+LIST=$(kubectl get sts -A | awk '{print $1 ,  $2}' | FLISTY "Describe Statefulsets")
+
+kubectl describe sts -n ${LIST}
+if [ "$?" -eq 0 ]; then
+	echo "$LIST Statefulset Found!" | $NOTIFIER
+else
+	echo "No Statefulset Selected" | $NOTIFIER
+	exit 1
+fi
+
+# use xargs to populate 'Found' message
+#kubectl describe node ${list}

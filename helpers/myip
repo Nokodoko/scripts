@@ -1,0 +1,4 @@
+
+#!/bin/bash 
+
+ifconfig wlan0 | grep 192 | cut -d: -f1 | awk '{print $2}'

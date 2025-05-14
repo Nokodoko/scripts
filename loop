@@ -1,0 +1,10 @@
+#!/bin/bash
+
+loop () {
+    while sleep 1
+    do
+      "$@"
+    done
+}
+
+loop "$@"

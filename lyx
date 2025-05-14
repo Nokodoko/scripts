@@ -1,0 +1,7 @@
+#!/bin/bash
+
+JUMPS='/home/n0ko/.config/lynx/jumpsUnix.html'
+SITE=$(cat ${JUMPS}  | rg http | awk -F \> '{print $2}' | sed 's/<.*//' | fzf --reverse --border --border-label='lyx')
+URL=$(rg $SITE $JUMPS| awk -F \" '{print $2}')
+
+lynx -cfg=/home/n0ko/.config/lynx/lynx.cfg $URL

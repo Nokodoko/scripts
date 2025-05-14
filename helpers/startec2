@@ -1,0 +1,12 @@
+#!/bin/bash 
+
+#Variables
+LSEC2=$('aws ec2 describe-instances --filters "Name=instance-type,Values=t2.micro" --query "Reservations[].Instances[].InstanceId"')
+
+#functions
+function INSID() {
+    lsec2 | gp -i i  | sed 's/"//g' | sed 's/,//' | gp c |sed -n ${1}p
+}
+
+#excution
+aws ec2 start-instances --instance-ids ${INSID}

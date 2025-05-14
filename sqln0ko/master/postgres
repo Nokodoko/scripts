@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+DB='postgres'
+UN='n0ko'
+# PW=
+
+function database() {
+  psql -U $UN -d $DB
+}
+
+database

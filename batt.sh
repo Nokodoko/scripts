@@ -1,10 +1,10 @@
 #!/bin/bash 
 
-bat=$(cat /sys/class/power_supply/BAT0/capacity)
-ns=notify-send -u critical
+loop () {
+    while true; do
+      "$@"
+      sleep 2
+    done
+}
 
-while [ ${bat} < 15 ]
-do 
-    ${ns} "I'm Dying!"
-done
-    
+loop /home/n0ko/programming/lua_projects/batt.lua

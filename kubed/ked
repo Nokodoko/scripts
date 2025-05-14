@@ -1,23 +1,23 @@
 #!/bin/bash
 
-tm='terminal-notifier'
+ns='notify-send -u low'
 
 DEPLOYMENT=$(kubectl get deploy -A | awk '{print $1, $2, $4}' | fzf --layout reverse | awk '{print $1, $2}')
 
-kubectl edit deploy -n ${DEPLOYMENT} 
-   if [ "$?" -eq 0 ]; then
-       echo "SELCTED!" | $tm
-   else
-       echo "No Pod Selected" | $tm
-       exit 1
-   fi
+kubectl edit deploy -n ${DEPLOYMENT}
+if [ "$?" -eq 0 ]; then
+  echo "SELCTED!" | $ns
+else
+  echo "No Pod Selected" | $ns
+  exit 1
+fi
 
-#kubectl logs -n $(kubectl get po -A | awk '{print $1, $2, $4}' | fzf --layout reverse | awk '{print $1, $2}') 
+#kubectl logs -n $(kubectl get po -A | awk '{print $1, $2, $4}' | fzf --layout reverse | awk '{print $1, $2}')
 #   if [ "$?" -eq 0 ]; then
 #       ${DUN} "SELCTED!"
-##       ${tm} "SELCTED!"
+##       ${ns} "SELCTED!"
 #   else
 #       DUNstify -u critical "No Pod Selected"
-#       #${tm} "No Pod Selected"
+#       #${ns} "No Pod Selected"
 #       exit 1
 #   fi

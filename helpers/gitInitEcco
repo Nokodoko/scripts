@@ -1,0 +1,11 @@
+#!/bin/bash
+DIR_NAME="$(basename $(pwd))"
+
+echo "${DIR_NAME}" >>README.md
+git init
+git add README.md
+git commit -m "first commit"
+git branch -M main
+# git remote add origin git@github.com:cMonty614/${DIR_NAME}.git
+git remote add origin git@github.com-cMonty614:cMonty614/${DIR_NAME}.git
+git push -u origin main

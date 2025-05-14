@@ -1,0 +1,15 @@
+#!/bin/bash
+
+dmenu='dmenu -m 0 -fn VictorMono:size=20 -nf green -nb black -nf green -sb black'
+dun='dunstify -h int:value:'
+tm='terminal-notifier'
+
+kubectl logs --timestamps=true -n $(kubectl get po -A | rg -i rabbit | awk '{print $1, $2, $4}' | fzf --layout reverse | awk '{print $1, $2}') -c metrics
+   if [ "$?" -eq 0 ]; then
+       ${dun} "SELCTED!"
+#       ${tm} "SELCTED!"
+   else
+       dunstify -u critical "No Pod Selected"
+       #${tm} "No Pod Selected"
+       exit 1
+   fi

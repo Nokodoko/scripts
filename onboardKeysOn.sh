@@ -1,5 +1,5 @@
 #!/bin/bash
-xinput set-prop $(onboardKeyId.sh) "Device Enabled" 1 &
+xinput set-prop $(onboardKeyIdOn.sh) "Device Enabled" 1 &
 
 if [ "$?" -eq 0 ]; then
     dunstify -u low "Onboard Keyboard Enabled"

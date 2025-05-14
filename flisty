@@ -1,0 +1,9 @@
+#!/bin/bash
+
+ARG=$@
+
+function flisty() {
+  fzf --reverse --border --border-label="$ARG"
+}
+
+flisty

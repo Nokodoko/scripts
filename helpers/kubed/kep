@@ -1,0 +1,27 @@
+#!/bin/bash
+
+dmenu='dmenu -m 0 -fn VictorMono:size=20 -nf green -nb black -nf green -sb black'
+DUN='dunstify -h int:value:'
+tm='terminal-notifier'
+
+PODNAME=$(kubectl get po -A | awk '{print $1, $2, $4}' | fzf --layout reverse | awk '{print $1, $2}')
+
+kubectl edit pod -n ${PODNAME} 
+   if [ "$?" -eq 0 ]; then
+       ${DUN} "SELCTED!"
+#       ${tm} "SELCTED!"
+   else
+       DUNstify -u critical "No Pod Selected"
+       #${tm} "No Pod Selected"
+       exit 1
+   fi
+
+#kubectl logs -n $(kubectl get po -A | awk '{print $1, $2, $4}' | fzf --layout reverse | awk '{print $1, $2}') 
+#   if [ "$?" -eq 0 ]; then
+#       ${DUN} "SELCTED!"
+##       ${tm} "SELCTED!"
+#   else
+#       DUNstify -u critical "No Pod Selected"
+#       #${tm} "No Pod Selected"
+#       exit 1
+#   fi

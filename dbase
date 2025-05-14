@@ -1,45 +1,49 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-
-#add getops() -q
-#case
-#    q)
-#        ;;
-#esac
-
+#COLORS
 function capColor() {
-    TEXT=$1
-    gum style --foreground "#118DFF" "$TEXT"
+  TEXT=$1
+  gum style --foreground "#118DFF" "$TEXT"
 }
 
 function redColor() {
-    TEXT=$1
-    gum style --foreground "#D82C20" "$TEXT"
+  TEXT=$1
+  gum style --foreground "#D82C20" "$TEXT"
 }
 
-
 gum style \
-    --border double \
-    --padding "1" \
-    "Capacity Databases"
+  --border double \
+  --padding "1" \
+  "Capacity Databases"
 
-while getopts 'q' OPTION; do
-    case "$OPTION" in
-        q)
+#FLAGS
+while getopts ':qmQ' OPTION; do
+  case "$OPTION" in
+  q)
     echo "Choose $(redColor "permission") level $(capColor "for query")"
-    TYPE=$(gum choose "readOnly" "dba")
-    DATABASE=$(gum filter < ~/scripts/sqlQuery/dbList.md)
+    TYPE=$(gum choose "readOnly" "dba" "master")
+    DATABASE=$(gum filter <~/scripts/sqlQuery/dbList.md)
     ~/scripts/sqlQuery/$TYPE/$DATABASE
-            ;;
-        *)
-            echo "Invalid flag"
-            exit 1
-            ;;
-    esac
+    exit 0
+    ;;
+  m)
+    ~/scripts/sqlLog/main/main.sh
+    exit 0
+    ;;
+  Q)
+    ~/scripts/sqlQuery/main/main.sh
+    exit 0
+    ;;
+  *)
+    echo "Invalid flag"
+    exit 1
+    ;;
+  esac
 done
 
+#BASE PROGRAM
 echo "Choose $(redColor "permission") level"
-TYPE=$(gum choose "readOnly" "dba")
-DATABASE=$(gum filter < ~/scripts/sqlLog/dbList.md)
+TYPE=$(gum choose "readOnly" "dba" "master")
+DATABASE=$(gum filter <~/scripts/sqlLog/dbList.md)
 
 ~/scripts/sqlLog/$TYPE/$DATABASE
