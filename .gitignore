@@ -9,3 +9,4 @@ sqlLog
 sqlQuery
 schemas.sh
 helpers/lp_reporting/
+analytics.sql
