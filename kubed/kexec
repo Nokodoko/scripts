@@ -6,7 +6,7 @@ CONTAINER=$(kubectl get po -n ${PODNAME} -o jsonpath='{range .spec.containers[*]
 
 #COMMAND
 function exec() {
-    kubectl exec -it  -c ${CONTAINER} -n ${PODNAME} -- /bin/bash
+    kubectl exec -it  -c ${CONTAINER} -n ${PODNAME} -- /bin/sh
 }
 
 exec 

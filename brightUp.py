@@ -1,20 +1,20 @@
 #!/bin/env python3
 
-brightness_file = '/sys/class/backlight/intel_backlight/brightness'
+brightness_file = "/sys/class/backlight/intel_backlight/brightness"
 
 try:
-    with open(brightness_file, 'r') as file:
+    with open(brightness_file, "r") as file:
         current_val = int(file.read().strip())
 except FileNotFoundError:
-    print(f'{brightness_file} not found')
+    print(f"{brightness_file} not found")
     exit(1)
 except ValueError:
     print(f"Could not convert value in {brightness_file} to an int")
     exit(1)
 
-new_val = current_val + 50
+new_val = current_val + 5
 try:
-    with open(brightness_file, 'w') as file:
+    with open(brightness_file, "w") as file:
         file.write(str(new_val))
 
 except IOError as e:

@@ -5,7 +5,7 @@ import shutil
 os.chdir("/home/n0ko/Programs/neovim/")
 os.system("git pull")
 print("Nvim Repo Updated")
-os.system("git checkout nightly")
+os.system("git checkout HEAD")
 os.system("sudo make clean install")
 print("Completed Neovim Nightly Build")
 
