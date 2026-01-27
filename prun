@@ -1,0 +1,5 @@
+#!/bin/bash
+
+IMAGE=$(podman images | fzf | awk '{print $3}')
+
+podman run -dit --entrypoint "/bin/sh" ${IMAGE}

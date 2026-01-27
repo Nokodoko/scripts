@@ -1,0 +1,5 @@
+#!/bin/bash
+
+CID=$(podman ps | fzf | awk '{print $1}')
+
+podman exec -it ${CID} /bin/bash
