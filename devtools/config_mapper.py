@@ -14,35 +14,28 @@ def create_argument_parser():
   # Default mode
   ./config_mapper.py ping_template.yaml lmr_ping_devices.yaml conf.yaml
 
-  # Concat: Add devices to existing config (one or more TEMPLATE:VALUES pairs)
-  ./config_mapper.py -c conf.yaml ping_template.yaml:lmr_ping_devices.yaml
-  ./config_mapper.py -c conf.yaml tmpl1.yaml:vals1.yaml tmpl2.yaml:vals2.yaml
+  # Concat: Add devices to existing config
+  ./config_mapper.py -c conf.yaml -i ping_template.yaml lmr_ping_devices.yaml
+  ./config_mapper.py -c conf.yaml -i tmpl1.yaml vals1.yaml -i tmpl2.yaml vals2.yaml
 
-  # Combine: Create new config from multiple TEMPLATE:VALUES pairs
-  ./config_mapper.py -m conf.yaml ping_template.yaml:lmr_ping_devices.yaml other_template.yaml:washington_ping_devices.yaml
+  # Combine: Create new config from multiple template/values pairs
+  ./config_mapper.py -m output.yaml -i ping_template.yaml lmr.yaml -i other_tmpl.yaml washington.yaml
 
-Note: TEMPLATE:VALUES pairs allow each values file to use its own template.
+Note: Each -i/--input takes TEMPLATE then VALUES as separate args (tab-completion friendly).
 ''')
 
     parser.add_argument('positional', nargs='*', metavar='ARG',
                         help='Default mode: TEMPLATE_FILE MAP_FILE [OUTPUT_FILE]')
-    parser.add_argument('-c', '--concat', nargs='+', metavar='ARGS',
-                        help='Concatenate: CONFIG_FILE followed by TEMPLATE:VALUES pairs')
-    parser.add_argument('-m', '--combine-multiple', nargs='+', metavar='ARGS',
+    parser.add_argument('-c', '--concat', metavar='CONFIG',
+                        help='Concatenate: append rendered instances onto CONFIG file')
+    parser.add_argument('-m', '--combine-multiple', metavar='OUTPUT',
                         dest='combine_multiple',
-                        help='Combine: OUTPUT_FILE followed by 2+ TEMPLATE:VALUES pairs')
+                        help='Combine: create new config at OUTPUT from multiple inputs')
+    parser.add_argument('-i', '--input', nargs=2, metavar=('TEMPLATE', 'VALUES'),
+                        action='append', dest='inputs',
+                        help='Template and values file pair (can be repeated)')
 
     return parser
-
-
-def parse_template_values_pair(pair_str):
-    """Parse a TEMPLATE:VALUES pair string into (template, values) tuple."""
-    if ':' not in pair_str:
-        return None, None
-    parts = pair_str.split(':', 1)
-    if len(parts) != 2:
-        return None, None
-    return parts[0], parts[1]
 
 
 def load_yaml_file(filepath):
@@ -55,22 +48,36 @@ def render_template(template_file, config_data):
     """Render a Jinja2 template with the given config data."""
     env = Environment(loader=FileSystemLoader('.'))
     template = env.get_template(template_file)
+    # Handle YAML files that are plain lists (no root key)
+    if isinstance(config_data, list):
+        config_data = {'ping_devices': config_data}
     return template.render(**config_data)
 
 
 def extract_instances_section(rendered):
-    """Extract instance entries from rendered content (skip init_config: and instances: headers)."""
+    """Extract instance entries from rendered content (skip init_config: and instances: headers).
+
+    If the template has no headers, return the content as-is (stripped).
+    """
     lines = rendered.split('\n')
-    # Find where instances start (after 'instances:' line)
-    instance_lines = []
-    in_instances = False
-    for line in lines:
-        if line.strip() == 'instances:':
-            in_instances = True
-            continue
-        if in_instances and line.strip():
-            instance_lines.append(line)
-    return '\n'.join(instance_lines)
+
+    # Check if this template has the standard headers
+    has_instances_header = any(line.strip() == 'instances:' for line in lines)
+
+    if has_instances_header:
+        # Extract only the content after 'instances:'
+        instance_lines = []
+        in_instances = False
+        for line in lines:
+            if line.strip() == 'instances:':
+                in_instances = True
+                continue
+            if in_instances and line.strip():
+                instance_lines.append(line)
+        return '\n'.join(instance_lines)
+    else:
+        # No headers - return content as-is, stripping empty lines at start/end
+        return rendered.strip()
 
 
 def mode_default(args):
@@ -96,59 +103,37 @@ def mode_default(args):
 
 
 def mode_concat(args):
-    """Concat mode: append rendered TEMPLATE:VALUES pairs onto existing CONFIG file."""
-    if len(args.concat) < 2:
-        print("Error: --concat requires CONFIG_FILE followed by at least one TEMPLATE:VALUES pair")
-        print("Usage: ./config_mapper.py -c CONFIG_FILE TEMPLATE:VALUES [TEMPLATE:VALUES ...]")
+    """Concat mode: append rendered instances onto existing CONFIG file."""
+    if not args.inputs:
+        print("Error: --concat requires at least one -i/--input TEMPLATE VALUES pair")
+        print("Usage: ./config_mapper.py -c CONFIG -i TEMPLATE VALUES [-i TEMPLATE VALUES ...]")
         sys.exit(1)
 
-    config_file = args.concat[0]
-    pairs = args.concat[1:]
+    config_file = args.concat
 
-    # Validate all pairs before processing
-    parsed_pairs = []
-    for pair_str in pairs:
-        template_file, values_file = parse_template_values_pair(pair_str)
-        if template_file is None:
-            print(f"Error: Invalid TEMPLATE:VALUES pair: '{pair_str}'")
-            print("Expected format: TEMPLATE_FILE:VALUES_FILE (e.g., ping_template.yaml:devices.yaml)")
-            sys.exit(1)
-        parsed_pairs.append((template_file, values_file))
-
-    # Process each pair
+    # Process each input pair
     with open(config_file, 'a') as f:
-        for template_file, values_file in parsed_pairs:
+        for template_file, values_file in args.inputs:
             config_data = load_yaml_file(values_file)
             rendered = render_template(template_file, config_data)
             instances_only = extract_instances_section(rendered)
             f.write('\n' + instances_only)
             print(f"Appended instances from '{values_file}' (template: {template_file})")
 
-    print(f"Done. Appended {len(parsed_pairs)} file(s) to '{config_file}'")
+    print(f"Done. Appended {len(args.inputs)} file(s) to '{config_file}'")
 
 
 def mode_combine_multiple(args):
-    """Combine mode: create new config from multiple TEMPLATE:VALUES pairs."""
-    if len(args.combine_multiple) < 3:
-        print("Error: --combine-multiple requires OUTPUT_FILE followed by at least 2 TEMPLATE:VALUES pairs")
-        print("Usage: ./config_mapper.py -m OUTPUT_FILE TEMPLATE:VALUES TEMPLATE:VALUES [...]")
+    """Combine mode: create new config from multiple template/values pairs."""
+    if not args.inputs or len(args.inputs) < 2:
+        print("Error: --combine-multiple requires at least 2 -i/--input TEMPLATE VALUES pairs")
+        print("Usage: ./config_mapper.py -m OUTPUT -i TEMPLATE VALUES -i TEMPLATE VALUES [...]")
         sys.exit(1)
 
-    output_file = args.combine_multiple[0]
-    pairs = args.combine_multiple[1:]
-
-    # Validate all pairs before processing
-    parsed_pairs = []
-    for pair_str in pairs:
-        template_file, values_file = parse_template_values_pair(pair_str)
-        if template_file is None:
-            print(f"Error: Invalid TEMPLATE:VALUES pair: '{pair_str}'")
-            print("Expected format: TEMPLATE_FILE:VALUES_FILE (e.g., ping_template.yaml:devices.yaml)")
-            sys.exit(1)
-        parsed_pairs.append((template_file, values_file))
+    output_file = args.combine_multiple
 
     # Process first pair - include full output with headers
-    first_template, first_values = parsed_pairs[0]
+    first_template, first_values = args.inputs[0]
     config_data = load_yaml_file(first_values)
     rendered_config = render_template(first_template, config_data)
 
@@ -157,14 +142,14 @@ def mode_combine_multiple(args):
         print(f"Created base from '{first_values}' (template: {first_template})")
 
         # Process remaining pairs - extract instances only
-        for template_file, values_file in parsed_pairs[1:]:
+        for template_file, values_file in args.inputs[1:]:
             config_data = load_yaml_file(values_file)
             rendered = render_template(template_file, config_data)
             instances_only = extract_instances_section(rendered)
             f.write('\n' + instances_only)
             print(f"Added instances from '{values_file}' (template: {template_file})")
 
-    print(f"Done. Combined {len(parsed_pairs)} file(s) into '{output_file}'")
+    print(f"Done. Combined {len(args.inputs)} file(s) into '{output_file}'")
 
 
 def main():
