@@ -13,7 +13,7 @@ URGENCY="$5"
 # Log the notification for debugging
 echo "$(date): Rayne notification received - $SUMMARY: $BODY" >> /tmp/rayne-notifications.log
 
-# Open lf in a floating wezterm window (class wezterm-lf triggers dwm floating rule)
-wezterm start --class wezterm-lf -- lf /home/n0ko/Portfolio/rayne &
+# Open file manager in a floating wezterm window (class wezterm-lf triggers dwm floating rule)
+/home/n0ko/scripts/fm-launcher.sh lf /home/n0ko/Portfolio/rayne &
 
 exit 0
