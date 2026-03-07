@@ -42,7 +42,7 @@ fi
 # Select source directory
 if [[ "$VERSION" == "pertag" ]]; then
     SRC_DIR="$PERTAG_DIR"
-    LABEL="pertag (dual-monitor)"
+    LABEL="pertag (quad-monitor)"
 else
     SRC_DIR="$BASE_DIR"
     LABEL="base (single-monitor)"
@@ -81,7 +81,7 @@ notify-send "dwm" "Switching to $LABEL..." --urgency=normal
 sleep 0.5
 
 # Refresh wallpaper after restart (runs in background, waits for new dwm)
-(sleep 2 && feh --bg-fill ~/Pictures/archCraft.png --bg-fill ~/Pictures/archCraft.png) &
+(sleep 2 && feh --bg-fill ~/Pictures/archCraft.png --bg-fill ~/Pictures/archCraft.png --bg-fill ~/Pictures/archCraft.png --bg-fill ~/Pictures/archCraft.png) &
 
 # Kill dwm to trigger restart loop in .xinitrc
 killall dwm

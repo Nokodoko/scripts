@@ -2,7 +2,7 @@
 
 #CONSTANTS
 ns=notify-send
-dmenu='dmenu -m 0 -fn VictorMono:size=17 -nf cyan -nb black -nf cyan -sb black'
+dmenu='dmenu -m 1 -fn VictorMono:size=17 -nf cyan -nb black -nf cyan -sb black'
 
 #VARIABLES
 SPELL=$(ls ~/scripts | ${dmenu})

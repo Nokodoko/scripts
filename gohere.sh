@@ -2,7 +2,7 @@
 #vim:tw=79:ts=8:ft=<ft>:norl:
 
 ns=notify-send
-dmenu='dmenu -m 0 -fn VictorMono:size=20 -nf green -nb black -nf green -sb black'
+dmenu='dmenu -m 1 -fn VictorMono:size=20 -nf green -nb black -nf green -sb black'
 DFY='dunstify -u'
     $DFY "Running First"
 

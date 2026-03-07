@@ -4,7 +4,7 @@
 #1.HATE THAT I HAVE TO USE 3 FILES (MANY SEPARATE OS WRITE FUNCTIONS) -- non-priority
 #2. Unmarshall package in go mekes this easier
 
-dmenu='dmenu -m 0 -fn VictorMono:size=20 -nf green -nb black -nf green -sb black'
+dmenu='dmenu -m 1 -fn VictorMono:size=20 -nf green -nb black -nf green -sb black'
 ch='choose'
 dun='dunstify -h int:value:' 
 FDQN=$(echo "                "|${dmenu} -p "Enter the requested-domain name")

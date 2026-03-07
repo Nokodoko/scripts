@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ns=notify-send
-DMENU='dmenu -m 0 -fn VictorMono:size=17 -nf cyan -nb black -nf cyan -sb black'
+DMENU='dmenu -m 1 -fn VictorMono:size=17 -nf cyan -nb black -nf cyan -sb black'
 DUNL='dunstify -u low' 
 DUNN='dunstify -u normal' 
 

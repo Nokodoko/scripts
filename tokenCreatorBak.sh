@@ -7,7 +7,7 @@
 #NOTIFIERS / BLUE SELECTOR IS FOR STAGING
 NS=notify-send
 #DMENU='dmenu -m 0 -fn VictorMono:size=17 -nf cyan -nb black -nf cyan -sb blue'
-DMENU='dmenu -m 0 -fn VictorMono:size=17 -nf cyan -nb black -nf cyan -sb blue'
+DMENU='dmenu -m 1 -fn VictorMono:size=17 -nf cyan -nb black -nf cyan -sb blue'
 DUN='dunstify -h int:value:'
 
 #DIRECTORIES AND FILES

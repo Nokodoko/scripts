@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #CONSTANTS
-DMENU='dmenu -m 0 -fn VictorMono:size=17 -nf cyan -nb black -nf cyan -sb black'
+DMENU='dmenu -m 1 -fn VictorMono:size=17 -nf cyan -nb black -nf cyan -sb black'
 DFY='dunstify -u low'
 #GIVE SPELL NAME
 SPELL=$(echo "                 " | ${DMENU} -p "Name your spell")

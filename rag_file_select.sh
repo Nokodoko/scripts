@@ -2,7 +2,7 @@
 #this is a prototype for local rag, in a shell script. Rewrite in lua and then in another system language later
 #
 ns=notify-send
-dmenu='dmenu -m 0 -fn VictorMono:size=20 -nf green -nb black -nf green -sb black'
+dmenu='dmenu -m 1 -fn VictorMono:size=20 -nf green -nb black -nf green -sb black'
 dun='dunstify -h int:value:'
 
 RAG_DIR='/home/n0ko/rag_files/'
