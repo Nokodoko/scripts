@@ -146,9 +146,10 @@ handle_hotplug() {
                 log "ERROR: Could not get CRTCs ready, staying on eDP-1"
             fi
         elif [[ "$dp_count" -eq 1 ]]; then
-            log "Single external, switching to 2-monitor layout"
+            log "Single external, switching to mobile layout (eDP-1 + DP-1 strip)"
             switch_to_ethernet
-            /home/n0ko/scripts/lewis-layout.sh 2>&1 | while read -r line; do log "$line"; done
+            # mobile.sh applies xrandr + hotswaps dwm to mobile + runs apply-mobile.sh
+            /home/n0ko/.screenlayout/mobile.sh 2>&1 | while read -r line; do log "$line"; done
         else
             log "No externals, switching to single-monitor pertag"
             switch_to_wifi

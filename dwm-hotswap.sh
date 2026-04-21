@@ -1,6 +1,6 @@
 #!/bin/bash
 # dwm-hotswap.sh - Unified dwm build-and-restart script
-# Usage: dwm-hotswap.sh [base|pertag]
+# Usage: dwm-hotswap.sh [base|pertag|pertag-multi]
 #
 # Builds the appropriate dwm version, installs it, and kills the running
 # instance so the .xinitrc restart loop relaunches the new binary.
@@ -18,8 +18,8 @@ PERTAG_DIR="/home/n0ko/bling/dwm-pertag"
 VERSION="${1:-base}"
 
 # Validate argument
-if [[ "$VERSION" != "base" && "$VERSION" != "pertag" ]]; then
-    notify-send "dwm hotswap" "Invalid version: $VERSION (use 'base' or 'pertag')" --urgency=critical
+if [[ "$VERSION" != "base" && "$VERSION" != "pertag" && "$VERSION" != "pertag-multi" && "$VERSION" != "mobile" ]]; then
+    notify-send "dwm hotswap" "Invalid version: $VERSION (use 'base', 'pertag', 'pertag-multi', or 'mobile')" --urgency=critical
     exit 1
 fi
 
@@ -39,19 +39,38 @@ if [[ -f "$STATE_FILE" ]]; then
     fi
 fi
 
-# Select source directory
-if [[ "$VERSION" == "pertag" ]]; then
+# Select source directory and config variant
+if [[ "$VERSION" == "pertag-multi" ]]; then
     SRC_DIR="$PERTAG_DIR"
-    LABEL="pertag (quad-monitor)"
+    LABEL="pertag-multi (multi-monitor)"
+    CONFIG_SRC="config.multi.h"
+elif [[ "$VERSION" == "pertag" ]]; then
+    SRC_DIR="$PERTAG_DIR"
+    LABEL="pertag (single-monitor)"
+    CONFIG_SRC="config.single.h"
+elif [[ "$VERSION" == "mobile" ]]; then
+    SRC_DIR="$PERTAG_DIR"
+    LABEL="mobile (eDP-1 + DP-1 strip)"
+    CONFIG_SRC="config.mobile.h"
 else
     SRC_DIR="$BASE_DIR"
     LABEL="base (single-monitor)"
+    CONFIG_SRC=""
 fi
 
 # Verify source directory exists
 if [[ ! -d "$SRC_DIR" ]]; then
     notify-send "dwm hotswap" "Source directory not found: $SRC_DIR" --urgency=critical
     exit 1
+fi
+
+# For pertag variants, symlink the correct config before building
+if [[ -n "$CONFIG_SRC" ]]; then
+    if [[ ! -f "$SRC_DIR/$CONFIG_SRC" ]]; then
+        notify-send "dwm hotswap" "Config variant not found: $SRC_DIR/$CONFIG_SRC" --urgency=critical
+        exit 1
+    fi
+    ln -sf "$CONFIG_SRC" "$SRC_DIR/config.h"
 fi
 
 notify-send "dwm" "Building $LABEL..." --urgency=low
@@ -81,7 +100,22 @@ notify-send "dwm" "Switching to $LABEL..." --urgency=normal
 sleep 0.5
 
 # Refresh wallpaper after restart (runs in background, waits for new dwm)
-(sleep 2 && feh --bg-fill ~/Pictures/archCraft.png --bg-fill ~/Pictures/archCraft.png --bg-fill ~/Pictures/archCraft.png --bg-fill ~/Pictures/archCraft.png) &
+# pertag-multi: 4 outputs (built-in + 3 externals); single-monitor modes: 1 output
+if [[ "$VERSION" == "pertag-multi" ]]; then
+    (sleep 2 && feh --bg-fill ~/Pictures/archCraft.png \
+        --bg-fill ~/Pictures/archCraft.png \
+        --bg-fill ~/Pictures/archCraft.png \
+        --bg-fill ~/Pictures/archCraft.png) &
+elif [[ "$VERSION" == "mobile" ]]; then
+    (sleep 2 && feh --bg-fill ~/Pictures/archCraft.png \
+        --bg-fill ~/Pictures/archCraft.png) &
+else
+    (sleep 2 && feh --bg-fill ~/Pictures/archCraft.png) &
+fi
 
 # Kill dwm to trigger restart loop in .xinitrc
 killall dwm
+
+# Unmute default sink after restart — PipeWire sometimes mutes the Ryzen
+# analog output during xrandr-triggered HDMI audio device reconfiguration
+(sleep 3 && pactl set-sink-mute @DEFAULT_SINK@ 0) &
