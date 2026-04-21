@@ -51,30 +51,48 @@ apply_scheme() {
     export GUM_FILTER_TEXT_FOREGROUND="#F8F8F2"
 }
 
+# dbase-style title box + "Choose" subtitle, colored per lister.
+# $1 = title text, $2 = hex color, $3 = subtitle noun (e.g. "command")
+lister_header() {
+    local title="$1" color="$2" noun="$3"
+    gum style --border double --padding "1" --foreground "$color" "$title"
+    echo "Choose $(gum style --foreground "$color" "$noun")"
+    echo "Choose:"
+    echo
+}
+
+# Back sentinel prepended to every filter list; if picked, signals return.
+BACK_LABEL="← Back"
+
 notify() { notify-send "$@" 2>/dev/null || true; }
 
 # --- individual listers ------------------------------------------------------
 
 run_dmenu() {
     apply_scheme "#00FF00"
+    lister_header "Run Commands" "#00FF00" "command"
     # Collect executables on PATH (dmenu_path-style).
-    local pick
-    pick=$(IFS=:; for d in $PATH; do
+    local pick items
+    items=$(IFS=:; for d in $PATH; do
         [ -d "$d" ] || continue
         find "$d" -maxdepth 1 -type f -executable -printf '%f\n' 2>/dev/null
-    done | sort -u | gum filter --placeholder="run...") || return 0
+    done | sort -u)
+    pick=$(printf '%s\n%s\n' "$BACK_LABEL" "$items" | gum filter --placeholder="run...") || return 0
     [ -n "$pick" ] || return 0
+    [ "$pick" = "$BACK_LABEL" ] && return 0
     setsid -f "$pick" >/dev/null 2>&1 &
 }
 
 run_killer() {
     apply_scheme "#FF3030"
-    local pick pid
+    lister_header "Kill Processes" "#FF3030" "process"
+    local pick pid procs
     # pid + command, user-owned processes only.
-    pick=$(ps -u "$USER" -o pid=,comm= --sort=-pcpu \
-        | awk '{printf "%6s  %s\n", $1, $2}' \
-        | gum filter --placeholder="kill...") || return 0
+    procs=$(ps -u "$USER" -o pid=,comm= --sort=-pcpu \
+        | awk '{printf "%6s  %s\n", $1, $2}')
+    pick=$(printf '%s\n%s\n' "$BACK_LABEL" "$procs" | gum filter --placeholder="kill...") || return 0
     [ -n "$pick" ] || return 0
+    [ "$pick" = "$BACK_LABEL" ] && return 0
     pid=$(awk '{print $1}' <<<"$pick")
     [ -n "$pid" ] || return 0
     kill -9 "$pid" 2>/dev/null \
@@ -84,6 +102,7 @@ run_killer() {
 
 run_pass() {
     apply_scheme "#FF00FF"
+    lister_header "Passwords" "#FF00FF" "entry"
     local file="${PASS:-}"
     if [ -z "$file" ] || [ ! -f "$file" ]; then
         notify -u critical "pass" "PASS env var not set or file missing"
@@ -94,8 +113,9 @@ run_pass() {
     local entries pick password
     entries=$(grep -E '\\_$' "$file" | sed -E 's/\\_$//')
     [ -n "$entries" ] || { notify -u critical "pass" "no entries"; return 1; }
-    pick=$(printf '%s\n' "$entries" | gum filter --placeholder="pass...") || return 0
+    pick=$(printf '%s\n%s\n' "$BACK_LABEL" "$entries" | gum filter --placeholder="pass...") || return 0
     [ -n "$pick" ] || return 0
+    [ "$pick" = "$BACK_LABEL" ] && return 0
     # Locate the entry then grab the following non-empty line.
     password=$(awk -v key="${pick}\\\\_" '
         $0 == key { found=1; next }
@@ -113,11 +133,13 @@ run_pass() {
 
 run_wifi() {
     apply_scheme "#FFD700"
-    local pick
+    lister_header "Wi-Fi Networks" "#FFD700" "network"
+    local pick nets
     [ -d /etc/netctl ] || { notify -u critical "wifi" "/etc/netctl missing"; return 1; }
-    pick=$(find /etc/netctl -maxdepth 1 -type f -printf '%f\n' 2>/dev/null \
-        | sort -u | gum filter --placeholder="wifi...") || return 0
+    nets=$(find /etc/netctl -maxdepth 1 -type f -printf '%f\n' 2>/dev/null | sort -u)
+    pick=$(printf '%s\n%s\n' "$BACK_LABEL" "$nets" | gum filter --placeholder="wifi...") || return 0
     [ -n "$pick" ] || return 0
+    [ "$pick" = "$BACK_LABEL" ] && return 0
     if sudo -n netctl switch-to "$pick" 2>/dev/null; then
         notify "wifi" "connected: $pick"
     else
@@ -131,6 +153,7 @@ run_wifi() {
 run_blue() {
     # blue_connect already exports its own cyan/Monokai gum theme.
     apply_scheme "#00FFFF"
+    lister_header "Bluetooth Devices" "#00FFFF" "device"
     if command -v blue_connect >/dev/null 2>&1; then
         blue_connect
     else
@@ -140,22 +163,28 @@ run_blue() {
 
 # --- top-level picker --------------------------------------------------------
 
-unset_gum
+# Main loop: after any lister returns (selection made, back picked, or Esc
+# cancelled), come back to the Functions picker. Exit only when the user
+# cancels the top-level tv picker itself.
+while :; do
+    unset_gum
 
-# tv (television) — fuzzy-find over the list of listers. Ad-hoc channel sourced
-# from a printf of the lister names.
-choice=$(tv \
-    --source-command "printf '%s\n' run killer pass wifi blue" \
-    --input-header "lister" \
-    --no-sort) || exit 0
-[ -n "$choice" ] || exit 0
+    # tv (television) — fuzzy-find over the list of listers. Ad-hoc channel
+    # sourced from a printf of the lister names.
+    choice=$(tv \
+        --source-command "printf '%s\n' run killer pass wifi blue" \
+        --input-header "Functions" \
+        --no-sort) || exit 0
+    [ -n "$choice" ] || exit 0
 
-unset_gum
-case "$choice" in
-    run)    run_dmenu ;;
-    killer) run_killer ;;
-    pass)   run_pass ;;
-    wifi)   run_wifi ;;
-    blue)   run_blue ;;
-    *)      exit 0 ;;
-esac
+    unset_gum
+    case "$choice" in
+        run)    run_dmenu ;;
+        killer) run_killer ;;
+        pass)   run_pass ;;
+        wifi)   run_wifi ;;
+        blue)   run_blue ;;
+        *)      exit 0 ;;
+    esac
+    clear
+done
