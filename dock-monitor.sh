@@ -54,9 +54,12 @@ switch_to_ethernet() {
     if ip addr show eth0 | grep -q 'inet ' && ping -c1 -W2 -I eth0 192.168.50.1 &>/dev/null; then
         log "eth0 verified (IP + gateway reachable), disabling wlan0"
         sudo ip link set wlan0 down
-        # Restart dhcpcd so DNS resolvers update for the new interface
-        log "Restarting dhcpcd for DNS"
-        sudo systemctl restart dhcpcd 2>/dev/null || true
+        # Rebind eth0 non-disruptively so DNS resolvers update (does NOT tear wg0)
+        log "Rebinding eth0 for DNS (dhcpcd -n, preserves wg0)"
+        sudo dhcpcd -n eth0 2>/dev/null || true
+        sleep 2
+        log "Restarting wg-quick@wg0 to re-resolve peer endpoint"
+        sudo systemctl restart wg-quick@wg0 2>/dev/null || true
     else
         log "WARNING: eth0 not ready, keeping wlan0 active"
     fi
@@ -67,15 +70,18 @@ switch_to_wifi() {
     sudo ip link set eth0 down 2>/dev/null || true
     sudo ip addr flush dev eth0 2>/dev/null || true
     sudo ip link set wlan0 up
-    # Restart dhcpcd so it picks up wlan0 and updates DNS resolvers
-    log "Restarting dhcpcd for wlan0 + DNS"
-    sudo systemctl restart dhcpcd 2>/dev/null || true
     # iwd should auto-reconnect to known networks
     sleep 3
+    # Rebind wlan0 non-disruptively (does NOT tear wg0)
+    log "Rebinding wlan0 for DHCP + DNS (dhcpcd -n, preserves wg0)"
+    sudo dhcpcd -n wlan0 2>/dev/null || true
     if ! ip addr show wlan0 | grep -q 'inet '; then
-        log "wlan0 has no IP, requesting DHCP"
+        log "wlan0 still has no IP after rebind, requesting DHCP in background"
         sudo dhcpcd -b wlan0 2>/dev/null || true
     fi
+    sleep 2
+    log "Restarting wg-quick@wg0 to re-resolve peer endpoint"
+    sudo systemctl restart wg-quick@wg0 2>/dev/null || true
     log "wlan0 active"
 }
 
