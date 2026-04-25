@@ -1,6 +1,6 @@
 #!/bin/env python3
 
-brightness_file = "/sys/class/backlight/intel_backlight/brightness"
+brightness_file = "/sys/class/backlight/amdgpu_bl1/brightness"
 
 try:
     with open(brightness_file, "r") as file:
@@ -12,7 +12,8 @@ except ValueError:
     print(f"Could not convert value in {brightness_file} to an int")
     exit(1)
 
-new_val = current_val + 5
+max_val = 62451
+new_val = min(current_val + 3123, max_val)
 try:
     with open(brightness_file, "w") as file:
         file.write(str(new_val))
