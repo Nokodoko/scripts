@@ -146,24 +146,20 @@ layout_1monitor() {
 
 layout_2monitor() {
     local ext="$1"
-    log "2-monitor mode: external=$ext, eDP-1 below"
+    log "2-monitor mobile mode: eDP-1 primary above, external=$ext as 2560x720 strip below"
 
-    # Determine native resolution of external (first mode listed = preferred)
-    local ext_mode
-    ext_mode=$(xrandr --query | awk -v out="$ext" '
-        /^[^ ]/ { found = ($1 == out) }
-        found && /^ / { print $1; exit }
-    ')
-
-    log "External native mode: $ext_mode"
-
+    # Mobile layout: eDP-1 primary at origin, external as 2560x720 strip below
+    # Matches ~/.screenlayout/mobile.sh
     xrandr \
-        --output "$ext"       --mode "$ext_mode" --rate 60 --pos 0x0 \
         --output "$EDPOUTPUT" --mode "$EDPMODE"  --rate "$EDPRATE" \
-                              --pos 640x2160 --primary
+                              --pos 0x0 --primary --rotate normal \
+        --output "$ext"       --mode 2560x720 --rate 60 \
+                              --pos 0x1600 --rotate normal
 
     feh --bg-fill "$WALLPAPER"
-    "$HOTSWAP" pertag-multi
+    "$HOTSWAP" mobile
+    # apply-mobile.sh restarts glava/conky with mobile geometry
+    /home/n0ko/desktop-widgets/apply-mobile.sh &
 }
 
 # ── Dispatch ───────────────────────────────────────────────────────────────────
