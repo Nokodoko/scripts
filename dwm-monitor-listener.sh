@@ -54,9 +54,9 @@ get_current_version() {
 desired_version_for_count() {
     local count="$1"
     if [[ "$count" -ge 2 ]]; then
-        echo "pertag"
+        echo "pertag-multi"
     else
-        echo "base"
+        echo "pertag"
     fi
 }
 
@@ -100,21 +100,21 @@ handle_monitor_change() {
         return
     fi
 
-    if [[ "$desired" == "pertag" ]]; then
-        notify "Second monitor detected ($monitor_count monitors). Switching to pertag (dual-monitor) mode..." "normal"
-        log_msg "Switching to pertag (dual-monitor) mode"
+    if [[ "$desired" == "pertag-multi" ]]; then
+        notify "Multi-monitor detected ($monitor_count monitors). Switching to pertag-multi mode..." "normal"
+        log_msg "Switching to pertag-multi (multi-monitor) mode"
     else
-        notify "Single monitor detected. Switching to base (single-monitor) mode..." "normal"
-        log_msg "Switching to base (single-monitor) mode"
+        notify "Single monitor detected. Switching to pertag (single-monitor) mode..." "normal"
+        log_msg "Switching to pertag (single-monitor) mode"
     fi
 
     # Run the hotswap script (it handles building, installing, and restarting)
     if "$HOTSWAP_SCRIPT" "$desired" >> "$LOG_FILE" 2>&1; then
         log_msg "Hotswap to $desired completed successfully"
-        if [[ "$desired" == "pertag" ]]; then
-            notify "Pertag mode active. Per-tag layouts enabled." "normal"
+        if [[ "$desired" == "pertag-multi" ]]; then
+            notify "Pertag-multi mode active. Multi-monitor per-tag layouts enabled." "normal"
         else
-            notify "Base mode active. Standard layout." "normal"
+            notify "Pertag mode active. Single-monitor per-tag layouts enabled." "normal"
         fi
     else
         log_msg "ERROR: Hotswap to $desired failed!"
@@ -149,12 +149,12 @@ log_msg "Initial state: $INITIAL_COUNT monitor(s), current=$INITIAL_CURRENT, des
 if [[ "$INITIAL_CURRENT" == "unknown" ]]; then
     # First run: set the state without hotswapping (assume running version matches)
     # Only hotswap if we can determine we need a different version
-    if [[ "$INITIAL_COUNT" -ge 2 && "$INITIAL_CURRENT" != "pertag" ]]; then
+    if [[ "$INITIAL_COUNT" -ge 2 && "$INITIAL_CURRENT" != "pertag-multi" ]]; then
         handle_monitor_change
-    elif [[ "$INITIAL_COUNT" -lt 2 && "$INITIAL_CURRENT" != "base" ]]; then
-        # Write base state since that is what desktop branch gives us
-        echo "base" > "$STATE_FILE"
-        log_msg "Set initial state to base"
+    elif [[ "$INITIAL_COUNT" -lt 2 && "$INITIAL_CURRENT" != "pertag" ]]; then
+        # Write pertag state since single-monitor default is now pertag
+        echo "pertag" > "$STATE_FILE"
+        log_msg "Set initial state to pertag"
     fi
 fi
 
