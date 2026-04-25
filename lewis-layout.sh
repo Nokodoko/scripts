@@ -119,7 +119,11 @@ layout_3monitor() {
         --output "$EDPOUTPUT"   --pos 1280x2160
 
     feh --bg-fill "$WALLPAPER"
-    restart_widgets
+    # apply-multi.sh resets system.conkyrc to eDP-1 dimensions (2540 wide)
+    # so the lua-centered circular gauges land on the visible region of
+    # eDP-1; without this, switching from livingroom/mobile leaves a stale
+    # wider minimum_width and gauges render off-center.
+    /home/n0ko/desktop-widgets/apply-multi.sh &
     "$HOTSWAP" pertag-multi
 }
 
