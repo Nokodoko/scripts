@@ -3,9 +3,9 @@
 #
 # Entry point behavior:
 #   - If invoked with no args (the dwm keybinding path) we relaunch ourselves
-#     inside a wezterm window using the "wezterm-lister" class so dwm's Rule
+#     inside a kitty window using the "kitty-lister" class so dwm's Rule
 #     can float + center + size us.
-#   - Inside the wezterm child we set INSIDE=1 and run the gum picker.
+#   - Inside the kitty child we set INSIDE=1 and run the gum picker.
 #
 # Each picker runs in its own color scheme by exporting GUM_CHOOSE_* vars
 # before invoking gum. Colors per spec:
@@ -17,15 +17,15 @@
 
 set -u
 
-WEZTERM_CLASS="wezterm-lister"
+KITTY_CLASS="kitty-lister"
 
 # --- outer launch ------------------------------------------------------------
 if [ "${INSIDE:-0}" != "1" ]; then
     export INSIDE=1
-    exec wezterm start --class "$WEZTERM_CLASS" -- "$0" "$@"
+    exec kitty --class "$KITTY_CLASS" -- "$0" "$@"
 fi
 
-# --- inner (runs inside the wezterm-lister window) ---------------------------
+# --- inner (runs inside the kitty-lister window) ---------------------------
 
 # Reset any inherited gum theming before each picker configures its own.
 unset_gum() {
@@ -95,14 +95,20 @@ notify() { notify-send "$@" 2>/dev/null || true; }
 run_dmenu() {
     # tv fuzzy picker over PATH executables. No pagination.
     local src pick name
-    src='{ printf "%s\n" "← Back"; IFS=:; for d in $PATH; do [ -d "$d" ] || continue; find "$d" -maxdepth 1 -type f -executable -printf "%f\n" 2>/dev/null; done | sort -u; }'
+    # NOTE: tv detects $SHELL and spawns source-commands under it. Under zsh,
+    # `for d in $PATH` does NOT split on ':' (no sh_word_split by default),
+    # so the loop iterates once over the whole PATH string and yields nothing.
+    # Force bash to restore POSIX word-splitting semantics.
+    src=$'bash -c \'{ printf "%s\\n" "\xe2\x86\x90 Back"; IFS=:; for d in $PATH; do [ -d "$d" ] || continue; find "$d" -maxdepth 1 -executable \\! -type d -printf "%f\\n" 2>/dev/null; done | sort -u; }\''
     pick=$(tv --source-command "$src" --input-header "Run Commands" --no-sort --no-preview) || return 0
     [ -n "$pick" ] || return 0
     name=$(printf '%s' "$pick" | sed -E 's/\x1b\[[0-9;]*m//g')
     case "$name" in *"$BACK_PLAIN"*|"← Back") return 0 ;; esac
     name=${name%% *}
     [ -n "$name" ] || return 0
-    setsid -f "$name" >/dev/null 2>&1 &
+    setsid -f "$name" >/dev/null 2>&1 </dev/null
+    sleep 0.15
+    exit 0
 }
 
 run_killer() {
@@ -119,6 +125,7 @@ run_killer() {
     kill -9 "$pid" 2>/dev/null \
         && notify "killer" "kill -9 $plain" \
         || notify -u critical "killer" "failed to kill $pid"
+    exit 0
 }
 
 run_pass() {
@@ -151,10 +158,17 @@ run_pass() {
         notify -u critical "pass" "no password found for $pick"
         return 1
     fi
-    printf '%s' "$password" | xclip -selection clipboard -i
+    # xclip forks to become the X selection owner; when this script exits,
+    # kitty-lister closes and SIGHUPs the process group, killing the
+    # selection owner before any consumer can paste (no clipboard manager
+    # is running to persist it). setsid -f detaches xclip into its own
+    # session so it survives the terminal teardown. -loops 1 makes it
+    # self-exit after the first paste; the 45s clear below is a fallback.
+    printf '%s' "$password" | setsid -f xclip -selection clipboard -i -loops 1 >/dev/null 2>&1
     notify "pass" "copied ${pick}; clears in 45s"
-    (sleep 45 && printf '' | xclip -selection clipboard -i) >/dev/null 2>&1 &
+    ( sleep 45 && printf '' | setsid -f xclip -selection clipboard -i >/dev/null 2>&1 ) >/dev/null 2>&1 &
     disown 2>/dev/null || true
+    exit 0
 }
 
 run_wifi() {
@@ -242,6 +256,7 @@ run_wifi() {
             notify -u critical "wifi" "failed: $ssid"
         fi
     fi
+    exit 0
 }
 
 run_blue() {
@@ -382,6 +397,7 @@ quit
             notify -u critical "blue" "unknown state: $state"
             ;;
     esac
+    exit 0
 }
 
 # --- top-level picker --------------------------------------------------------

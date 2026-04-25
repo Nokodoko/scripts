@@ -9,7 +9,7 @@ DIR="${2:-.}"
 
 case "$FM" in
     yazi|lf)
-        exec wezterm start --class wezterm-lf -- "$FM" "$DIR"
+        exec kitty --class kitty-lf -- "$FM" "$DIR"
         ;;
     *)
         echo "Unknown file manager: $FM (supported: yazi, lf)" >&2

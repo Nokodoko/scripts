@@ -490,11 +490,11 @@ else
     skip "Steam monitor assignment needs manual verification"
 fi
 
-# Test 9.4: WezTerm rules exist for monitor 0
-if grep -q '"wezterm".*0,' "$PERTAG_CONFIG" || grep -q '"WezTerm".*0,' "$PERTAG_CONFIG"; then
-    pass "WezTerm/wezterm rule exists targeting monitor 0"
+# Test 9.4: kitty terminal rule exists for monitor 0
+if grep -q '"kitty".*0,' "$PERTAG_CONFIG"; then
+    pass "kitty rule exists targeting monitor 0"
 else
-    fail "No WezTerm rule found for monitor 0 in pertag config"
+    fail "No kitty rule found for monitor 0 in pertag config"
 fi
 
 

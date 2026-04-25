@@ -26,7 +26,7 @@ MAX_TILEABLE=5
 # Windows not matching any rule get the current tagset (unknown).
 declare -A CLASS_TO_TAG=(
     ["St"]=3
-    ["org.wezfurlong.wezterm"]=3
+    ["kitty"]=3
     ["wireshark"]=-1
     ["Slack"]=2
     ["teams-for-linux"]=1

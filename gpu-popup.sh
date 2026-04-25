@@ -13,4 +13,7 @@ PH=120
 X=$((SW - PW - 30))
 Y=$((SH - PH - 50))
 
-exec wezterm start --class gpu-select --position "$X,$Y" -- /home/n0ko/scripts/gpu-toggle.sh
+# kitty does not support `--position` the same way wezterm did; use dwm floating rule
+# on WM_CLASS "gpu-select" to place the window, or use kitty's
+# `--override initial_window_width/height` if size is all that matters.
+exec kitty --class gpu-select -- /home/n0ko/scripts/gpu-toggle.sh
