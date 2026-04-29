@@ -162,9 +162,14 @@ run_pass() {
     # kitty-lister closes and SIGHUPs the process group, killing the
     # selection owner before any consumer can paste (no clipboard manager
     # is running to persist it). setsid -f detaches xclip into its own
-    # session so it survives the terminal teardown. -loops 1 makes it
-    # self-exit after the first paste; the 45s clear below is a fallback.
-    printf '%s' "$password" | setsid -f xclip -selection clipboard -i -loops 1 >/dev/null 2>&1
+    # session so it survives the terminal teardown.
+    #
+    # Do NOT use -loops 1: many X clients (notification daemons, the WM,
+    # even xclip's own selection probe) request TARGETS conversion as soon
+    # as ownership changes — that probe consumes the single "loop" and
+    # xclip exits before the user can actually paste, so Ctrl+V yields
+    # nothing. The 45s explicit clear below is the lifetime control.
+    printf '%s' "$password" | setsid -f xclip -selection clipboard -i >/dev/null 2>&1
     notify "pass" "copied ${pick}; clears in 45s"
     ( sleep 45 && printf '' | setsid -f xclip -selection clipboard -i >/dev/null 2>&1 ) >/dev/null 2>&1 &
     disown 2>/dev/null || true
