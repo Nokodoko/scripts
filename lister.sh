@@ -197,9 +197,11 @@ run_wifi() {
         return 1
     fi
 
-    # Trigger a rescan (non-blocking best-effort).
+    # Trigger a rescan (non-blocking best-effort). iwd serves its last cached
+    # scan from get-networks immediately, so show that fast instead of
+    # blocking a full second on every open; the fresh scan lands shortly after.
     sudo -n iwctl station "$iface" scan >/dev/null 2>&1 || true
-    sleep 1
+    sleep 0.5
 
     # Collect available networks. iwctl output has a header block + table;
     # strip ANSI, skip headers, keep lines that start with >= 2 spaces.
@@ -264,13 +266,20 @@ run_wifi() {
     exit 0
 }
 
+# Stop the background discovery scan started by run_blue.
+_blue_stop_scan() {
+    kill "$1" 2>/dev/null || true
+    bluetoothctl --timeout 1 scan off >/dev/null 2>&1 &
+    disown 2>/dev/null || true
+}
+
 run_blue() {
     # Bluetooth with tv fuzzy picker. Shows:
     #   [connected] / [paired] / [new]  <MAC>  <Name>
     # On select:
     #   connected  -> disconnect  (toggle)
     #   paired     -> connect
-    #   new        -> trust + pair + connect
+    #   new        -> trust + pair + connect  (blocking one-shots)
     # Graceful errors for bluetoothd down / rfkill blocked.
 
     # Service + rfkill preflight.
@@ -293,112 +302,120 @@ run_blue() {
     bluetoothctl show 2>/dev/null | grep -q "Powered: yes" \
         || bluetoothctl power on >/dev/null 2>&1 || true
 
-    # Kick off background scan (non-blocking) to populate new devices.
-    ( bluetoothctl --timeout 8 scan on >/dev/null 2>&1 ) &
+    # Background discovery: scan while the menu is open so newly advertised
+    # devices accumulate. We no longer block the UI on a fixed 3s sleep —
+    # cached (connected/paired) devices render instantly; a "↻ Rescan" entry
+    # lets the user wait for new devices only when they actually want to pair.
+    ( bluetoothctl --timeout 12 scan on >/dev/null 2>&1 ) &
     local scan_pid=$!
 
-    # Give the scan a moment to discover; also allow existing cache to be used.
-    sleep 3
+    local pick plain rc tmp
+    while :; do
+        # Build merged device list (cached — instant).
+        tmp=$(mktemp)
+        {
+            printf '%s\n' "← Back"
+            printf '%s\n' "↻ Rescan"
+            # Connected first, then paired (not connected), then others (new).
+            local connected_macs paired_macs all_lines
+            connected_macs=$(bluetoothctl devices Connected 2>/dev/null | awk '/^Device /{print $2}')
+            paired_macs=$(bluetoothctl devices Paired 2>/dev/null | awk '/^Device /{print $2}')
+            all_lines=$(bluetoothctl devices 2>/dev/null)
 
-    # Build merged device list.
-    local tmp
-    tmp=$(mktemp)
-    {
-        printf '%s\n' "← Back"
-        # Connected first, then paired (not connected), then others (new).
-        local connected_macs paired_macs all_lines
-        connected_macs=$(bluetoothctl devices Connected 2>/dev/null | awk '/^Device /{print $2}')
-        paired_macs=$(bluetoothctl devices Paired 2>/dev/null | awk '/^Device /{print $2}')
-        all_lines=$(bluetoothctl devices 2>/dev/null)
+            # Emit connected
+            printf '%s\n' "$all_lines" | awk -v cm="$connected_macs" '
+                BEGIN { n=split(cm,a,"\n"); for(i=1;i<=n;i++) c[a[i]]=1 }
+                /^Device / && c[$2] {
+                    mac=$2; $1=""; $2=""; sub(/^  /,"");
+                    printf "[connected] %s  %s\n", mac, $0
+                }'
+            # Emit paired-but-not-connected
+            printf '%s\n' "$all_lines" | awk -v cm="$connected_macs" -v pm="$paired_macs" '
+                BEGIN {
+                    nc=split(cm,a,"\n"); for(i=1;i<=nc;i++) c[a[i]]=1
+                    np=split(pm,b,"\n"); for(i=1;i<=np;i++) p[b[i]]=1
+                }
+                /^Device / && p[$2] && !c[$2] {
+                    mac=$2; $1=""; $2=""; sub(/^  /,"");
+                    printf "[paired]    %s  %s\n", mac, $0
+                }'
+            # Emit new (unpaired, not connected)
+            printf '%s\n' "$all_lines" | awk -v cm="$connected_macs" -v pm="$paired_macs" '
+                BEGIN {
+                    nc=split(cm,a,"\n"); for(i=1;i<=nc;i++) c[a[i]]=1
+                    np=split(pm,b,"\n"); for(i=1;i<=np;i++) p[b[i]]=1
+                }
+                /^Device / && !p[$2] && !c[$2] {
+                    mac=$2; $1=""; $2=""; sub(/^  /,"");
+                    printf "[new]       %s  %s\n", mac, $0
+                }'
+        } > "$tmp"
 
-        # Emit connected
-        printf '%s\n' "$all_lines" | awk -v cm="$connected_macs" '
-            BEGIN { n=split(cm,a,"\n"); for(i=1;i<=n;i++) c[a[i]]=1 }
-            /^Device / && c[$2] {
-                mac=$2; $1=""; $2=""; sub(/^  /,"");
-                printf "[connected] %s  %s\n", mac, $0
-            }'
-        # Emit paired-but-not-connected
-        printf '%s\n' "$all_lines" | awk -v cm="$connected_macs" -v pm="$paired_macs" '
-            BEGIN {
-                nc=split(cm,a,"\n"); for(i=1;i<=nc;i++) c[a[i]]=1
-                np=split(pm,b,"\n"); for(i=1;i<=np;i++) p[b[i]]=1
-            }
-            /^Device / && p[$2] && !c[$2] {
-                mac=$2; $1=""; $2=""; sub(/^  /,"");
-                printf "[paired]    %s  %s\n", mac, $0
-            }'
-        # Emit new (unpaired, not connected)
-        printf '%s\n' "$all_lines" | awk -v cm="$connected_macs" -v pm="$paired_macs" '
-            BEGIN {
-                nc=split(cm,a,"\n"); for(i=1;i<=nc;i++) c[a[i]]=1
-                np=split(pm,b,"\n"); for(i=1;i<=np;i++) p[b[i]]=1
-            }
-            /^Device / && !p[$2] && !c[$2] {
-                mac=$2; $1=""; $2=""; sub(/^  /,"");
-                printf "[new]       %s  %s\n", mac, $0
-            }'
-    } > "$tmp"
+        pick=$(tv --source-command "cat $tmp" --input-header "Bluetooth ([connected]/[paired]/[new] · ↻ Rescan for new)" --no-sort --no-preview)
+        rc=$?
+        rm -f "$tmp"
 
-    local pick plain
-    pick=$(tv --source-command "cat $tmp" --input-header "Bluetooth (scanning… [connected]/[paired]/[new])" --no-sort --no-preview)
-    local rc=$?
-    rm -f "$tmp"
-
-    # Stop background scan.
-    kill "$scan_pid" 2>/dev/null || true
-    bluetoothctl --timeout 1 scan off >/dev/null 2>&1 &
-    disown 2>/dev/null || true
-
-    [ $rc -eq 0 ] || return 0
-    [ -n "$pick" ] || return 0
-    plain=$(printf '%s' "$pick" | sed -E 's/\x1b\[[0-9;]*m//g')
-    case "$plain" in *"$BACK_PLAIN"*|"← Back") return 0 ;; esac
+        [ $rc -eq 0 ] || { _blue_stop_scan "$scan_pid"; return 0; }
+        [ -n "$pick" ] || { _blue_stop_scan "$scan_pid"; return 0; }
+        plain=$(printf '%s' "$pick" | sed -E 's/\x1b\[[0-9;]*m//g')
+        case "$plain" in
+            *"$BACK_PLAIN"*|"← Back") _blue_stop_scan "$scan_pid"; return 0 ;;
+            *"↻ Rescan"*)
+                # Restart discovery and give it a beat to surface new devices,
+                # then rebuild the list.
+                kill "$scan_pid" 2>/dev/null || true
+                ( bluetoothctl --timeout 12 scan on >/dev/null 2>&1 ) &
+                scan_pid=$!
+                sleep 2.5
+                continue
+                ;;
+        esac
+        break
+    done
 
     # Parse: "[state]  <MAC>  <Name>"
     local state mac name
     state=$(printf '%s' "$plain" | awk '{print $1}')
     mac=$(printf   '%s' "$plain" | awk '{print $2}')
     name=$(printf  '%s' "$plain" | awk '{for(i=3;i<=NF;i++) printf "%s%s", $i, (i<NF?" ":"\n")}')
-    [ -n "$mac" ] || return 0
+    [ -n "$mac" ] || { _blue_stop_scan "$scan_pid"; return 0; }
 
     case "$state" in
         "[connected]")
-            gum spin --title "Disconnecting $name…" -- bash -c "bluetoothctl disconnect $mac" \
+            _blue_stop_scan "$scan_pid"
+            gum spin --title "Disconnecting $name…" -- bluetoothctl disconnect "$mac" \
                 && notify "blue" "disconnected: $name" \
                 || notify -u critical "blue" "disconnect failed: $name"
             ;;
         "[paired]")
-            gum spin --title "Connecting $name…" -- bash -c "bluetoothctl connect $mac" \
+            _blue_stop_scan "$scan_pid"
+            gum spin --title "Connecting $name…" -- bluetoothctl connect "$mac" \
                 && notify "blue" "connected: $name" \
                 || notify -u critical "blue" "connect failed: $name"
             ;;
         "[new]")
-            # trust -> pair -> connect, each with spinner feedback.
-            local script
-            script="default-agent
-power on
-trust $mac
-pair $mac
-connect $mac
-quit
-"
-            if gum spin --title "Trusting/pairing/connecting $name…" --show-error -- \
-                bash -c "printf '%s' '$script' | bluetoothctl >/tmp/blue_$$.log 2>&1"; then
-                # Re-check; bluetoothctl return code is unreliable.
-                if bluetoothctl info "$mac" 2>/dev/null | grep -q "Connected: yes"; then
-                    notify "blue" "paired+connected: $name"
-                else
-                    local err
-                    err=$(grep -Ei 'failed|error|refused' /tmp/blue_$$.log 2>/dev/null | tail -1)
-                    notify -u critical "blue" "pair/connect failed: $name ${err:-}"
-                fi
+            # Blocking one-shot sequence. In BlueZ 5.86 each `bluetoothctl
+            # <cmd>` runs its own mainloop and returns only when the D-Bus
+            # operation resolves — so pairing fully completes (bond + agent
+            # negotiation) before connect runs, unlike the old single piped
+            # session that issued `quit` mid-bond and only worked by luck.
+            # The one-shot also auto-registers a Just-Works pairing agent for
+            # its duration. Scan is kept running until AFTER pairing so BlueZ
+            # does not evict the not-yet-paired device from its cache.
+            bluetoothctl trust "$mac" >/dev/null 2>&1
+            gum spin --title "Pairing $name…" --show-error -- bluetoothctl pair "$mac" || true
+            sleep 0.5
+            gum spin --title "Connecting $name…" --show-error -- bluetoothctl connect "$mac" || true
+            _blue_stop_scan "$scan_pid"
+            # bluetoothctl return codes are unreliable; verify via info.
+            if bluetoothctl info "$mac" 2>/dev/null | grep -q "Connected: yes"; then
+                notify "blue" "paired+connected: $name"
             else
                 notify -u critical "blue" "pair/connect failed: $name"
             fi
-            rm -f /tmp/blue_$$.log
             ;;
         *)
+            _blue_stop_scan "$scan_pid"
             notify -u critical "blue" "unknown state: $state"
             ;;
     esac
