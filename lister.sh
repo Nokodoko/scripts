@@ -123,8 +123,8 @@ run_killer() {
     pid=$(printf '%s' "$plain" | awk '{print $1}')
     [[ "$pid" =~ ^[0-9]+$ ]] || return 0
     kill -9 "$pid" 2>/dev/null \
-        && notify "killer" "kill -9 $plain" \
-        || notify -u critical "killer" "failed to kill $pid"
+        && notify -a killer "killer" "kill -9 $plain" \
+        || notify -a killer -u critical "killer" "failed to kill $pid"
     exit 0
 }
 
