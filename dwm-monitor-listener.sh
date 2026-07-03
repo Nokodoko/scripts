@@ -1,6 +1,16 @@
 #!/bin/bash
 # dwm-monitor-listener.sh - Monitor hotplug listener daemon
 #
+# DEPRECATED: superseded by dock-monitor.sh, which runs as the enabled
+# systemd user unit dock-monitor.service (see `systemctl --user status
+# dock-monitor.service`). This script has no pid file and no unit — it is
+# not started by anything. Left in the repo for reference only. Its
+# state-file write below is disabled: dwm-hotswap.sh now owns
+# /tmp/dwm-monitor-state and only ever writes the verified key=value
+# format (version=/binhash=/outputs=); this script's old bare-word write
+# would have poisoned that cache with a value dwm-hotswap.sh correctly
+# treats as invalid, forcing a needless rebuild on the next real run.
+#
 # Listens for DRM subsystem events via udevadm and automatically switches
 # between base dwm (single monitor) and pertag dwm (dual monitor).
 #
@@ -152,9 +162,11 @@ if [[ "$INITIAL_CURRENT" == "unknown" ]]; then
     if [[ "$INITIAL_COUNT" -ge 2 && "$INITIAL_CURRENT" != "pertag-multi" ]]; then
         handle_monitor_change
     elif [[ "$INITIAL_COUNT" -lt 2 && "$INITIAL_CURRENT" != "pertag" ]]; then
-        # Write pertag state since single-monitor default is now pertag
-        echo "pertag" > "$STATE_FILE"
-        log_msg "Set initial state to pertag"
+        # DISABLED (see deprecation notice at top of file): this used to
+        # write the legacy bare-word state format, which dwm-hotswap.sh's
+        # verified guard now correctly treats as invalid rather than
+        # trusting. Leaving this a no-op instead of writing stale state.
+        log_msg "Skipping initial state write (script deprecated, see header)"
     fi
 fi
 
