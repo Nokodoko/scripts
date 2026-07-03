@@ -87,7 +87,23 @@ switch_to_wifi() {
 
 # Count connected DP outputs
 count_dp() {
-    xrandr --query 2>/dev/null | grep -cE '^DP-[0-9]+ connected' || echo 0
+    # grep -c prints the count but EXITS 1 on zero matches; the old
+    # `|| echo 0` then appended a SECOND "0", yielding "0\n0" and
+    # downstream `[[ -ge ]]` arithmetic-syntax errors. Capture + default.
+    local n
+    n=$(xrandr --query 2>/dev/null | grep -cE '^DP-[0-9]+ connected') || true
+    printf '%s\n' "${n:-0}"
+}
+
+# Turn off any DP output that is disconnected but still holds a mode/CRTC — a
+# "phantom" monitor. Xinerama keeps reporting it, so dwm sees an extra screen
+# (and an extra tag set) until the CRTC is freed. Used on undock and before
+# CRTC allocation on dock.
+free_stale_crtcs() {
+    while IFS= read -r stale; do
+        log "Freeing stale CRTC on $stale"
+        xrandr --output "$stale" --off 2>/dev/null || true
+    done < <(xrandr --query 2>/dev/null | grep -E '^DP-[0-9]+ disconnected [0-9]' | awk '{print $1}')
 }
 
 # Wait until xrandr can allocate CRTCs for all connected DP outputs.
@@ -96,16 +112,13 @@ wait_for_crtcs() {
     local max_attempts=10
     for attempt in $(seq 1 $max_attempts); do
         # Free stale CRTCs
-        while IFS= read -r stale; do
-            log "Freeing stale CRTC on $stale"
-            xrandr --output "$stale" --off 2>/dev/null || true
-        done < <(xrandr --query 2>/dev/null | grep -E '^DP-[0-9]+ disconnected [0-9]' | awk '{print $1}')
+        free_stale_crtcs
 
         # Check if we can enable a DP output
         local test_dp
         test_dp=$(xrandr --query 2>/dev/null | grep -E '^DP-[0-9]+ connected' | head -1 | awk '{print $1}')
         if [[ -n "$test_dp" ]]; then
-            if xrandr --output "$test_dp" --preferred --right-of eDP-1 2>/dev/null; then
+            if xrandr --output "$test_dp" --preferred --pos 0x1600 2>/dev/null; then
                 xrandr --output "$test_dp" --off 2>/dev/null || true
                 log "CRTCs ready (attempt $attempt)"
                 return 0
@@ -152,13 +165,21 @@ handle_hotplug() {
                 log "ERROR: Could not get CRTCs ready, staying on eDP-1"
             fi
         elif [[ "$dp_count" -eq 1 ]]; then
-            log "Single external, switching to mobile layout (eDP-1 + DP-1 strip)"
+            log "Single external, switching to mobile layout (eDP-1 + external strip)"
             switch_to_ethernet
-            # mobile.sh applies xrandr + hotswaps dwm to mobile + runs apply-mobile.sh
-            /home/n0ko/.screenlayout/mobile.sh 2>&1 | while read -r line; do log "$line"; done
+            # mobile-layout.sh detects the connected external dynamically (no
+            # hardcoded output name) and applies the vertical eDP-1+ext xrandr
+            # geometry. Then swap dwm to the 'mobile' variant whose tagmonmap
+            # {1,1,0,...} actually splits tags across the 2 monitors.
+            /home/n0ko/scripts/mobile-layout.sh 2>&1 | while read -r line; do log "$line"; done
+            free_stale_crtcs
+            /home/n0ko/scripts/dwm-hotswap.sh mobile 2>&1 | while read -r line; do log "$line"; done
         else
             log "No externals, switching to single-monitor pertag"
             switch_to_wifi
+            # Drop any phantom DP CRTC left enabled after undock so the dwm
+            # restart below sees exactly one Xinerama screen (one tag set).
+            free_stale_crtcs
             /home/n0ko/scripts/dwm-hotswap.sh pertag 2>&1 | while read -r line; do log "$line"; done
         fi
     ) 200>"$LOCKFILE"
