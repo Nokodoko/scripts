@@ -422,7 +422,162 @@ run_blue() {
     exit 0
 }
 
+run_mount() {
+    # Removable-device mount/unmount toggle with tv fuzzy picker. Lists ONLY
+    # hotplug / USB / RM=1 block devices that carry a filesystem:
+    #   [unmounted] <dev>  <size>  <fstype>  <label>   -> mount
+    #   [mounted]   <dev>  <size>  <fstype>  <mnt>     -> unmount  (toggle)
+    #
+    # Internal system partitions (/, /home, swap on the NVMe) are excluded so a
+    # stray keybind can never unmount the root fs.
+    #
+    # Mount strategy mirrors run_wifi's "clean path, then fall back":
+    #   1. udisksctl mount  — no sudo, auto-creates /run/media/$USER/<label>.
+    #      The udisks2 unit may read "inactive" but udisksd is D-Bus-activated,
+    #      so the call still spins it up on demand.
+    #   2. sudo -n mount     — passwordless fallback into an auto-made mountpoint
+    #      when udisks is genuinely unavailable.
+    local tmp pick plain state dev rc
+
+    # lsblk -P emits stable KEY="value" pairs so parsing never depends on column
+    # position. A device counts as removable if it OR its parent disk is
+    # usb/hotplug/RM — USB SSD enclosures report RM=0 on the partition, so the
+    # parent disk's TRAN=usb is the reliable signal (PKNAME links the two).
+    tmp=$(mktemp)
+    {
+        printf '%s\n' "← Back"
+        lsblk -P -o NAME,PKNAME,SIZE,FSTYPE,LABEL,MOUNTPOINT,TYPE,HOTPLUG,TRAN,RM 2>/dev/null \
+        | awk '
+            {
+                delete f
+                s=$0
+                while (match(s, /[A-Z]+="[^"]*"/)) {
+                    kv=substr(s, RSTART, RLENGTH)
+                    eq=index(kv,"=")
+                    f[substr(kv,1,eq-1)]=substr(kv,eq+2,length(kv)-eq-2)
+                    s=substr(s, RSTART+RLENGTH)
+                }
+                NAME[NR]=f["NAME"]; PK[NR]=f["PKNAME"]; SIZE[NR]=f["SIZE"]
+                FST[NR]=f["FSTYPE"]; LAB[NR]=f["LABEL"]; MNT[NR]=f["MOUNTPOINT"]
+                HP[NR]=f["HOTPLUG"]; TR[NR]=f["TRAN"]; RMV[NR]=f["RM"]
+                if (f["TYPE"]=="disk" && (f["TRAN"]=="usb"||f["HOTPLUG"]=="1"||f["RM"]=="1"))
+                    diskrm[f["NAME"]]=1
+                n=NR
+            }
+            END {
+                for (i=1;i<=n;i++) {
+                    if (FST[i]=="") continue   # no filesystem -> nothing to mount
+                    rem = (TR[i]=="usb"||HP[i]=="1"||RMV[i]=="1"||diskrm[PK[i]])
+                    if (!rem) continue         # internal device -> skip
+                    dev="/dev/" NAME[i]
+                    if (MNT[i]=="")
+                        printf "[unmounted] %-14s %-9s %-7s %s\n", dev, SIZE[i], FST[i], LAB[i]
+                    else
+                        printf "[mounted]   %-14s %-9s %-7s %s\n", dev, SIZE[i], FST[i], MNT[i]
+                }
+            }'
+    } > "$tmp"
+
+    # Only the Back line present -> nothing removable to act on.
+    if [ "$(wc -l < "$tmp")" -le 1 ]; then
+        rm -f "$tmp"
+        notify "mount" "no removable filesystems found"
+        gum style --border double --padding "1" --foreground "#FFA500" \
+            "No removable devices to mount" 2>/dev/null || true
+        sleep 2
+        return 1
+    fi
+
+    pick=$(tv --source-command "cat $tmp" --input-header "Mount / Unmount (removable)" --no-sort --no-preview)
+    rc=$?
+    rm -f "$tmp"
+    [ $rc -eq 0 ] || return 0
+    [ -n "$pick" ] || return 0
+    plain=$(printf '%s' "$pick" | sed -E 's/\x1b\[[0-9;]*m//g')
+    case "$plain" in *"$BACK_PLAIN"*|"← Back") return 0 ;; esac
+
+    state=$(printf '%s' "$plain" | awk '{print $1}')
+    dev=$(printf   '%s' "$plain" | awk '{print $2}')
+    case "$dev" in
+        /dev/*) : ;;
+        *) notify -u critical "mount" "could not parse device from selection"; return 1 ;;
+    esac
+
+    case "$state" in
+        "[unmounted]")
+            local out mp label
+            if out=$(udisksctl mount -b "$dev" 2>&1); then
+                notify "mount" "${out:-mounted $dev}"
+            else
+                label=$(lsblk -rno LABEL "$dev" 2>/dev/null)
+                [ -n "$label" ] || label=$(basename "$dev")
+                mp="/run/media/$USER/$label"
+                if sudo -n mkdir -p "$mp" 2>/dev/null && sudo -n mount "$dev" "$mp" 2>/dev/null; then
+                    notify "mount" "mounted $dev -> $mp"
+                else
+                    notify -u critical "mount" "mount failed: $dev"
+                fi
+            fi
+            ;;
+        "[mounted]")
+            # Device-aware unmount: one device (e.g. /dev/sda1 btrfs) can carry
+            # MANY mountpoints (subvols). Unmount ALL of them, not just by-device,
+            # and stop known holders first so umount isn't EBUSY.
+            local -a targets; local t still
+            mapfile -t targets < <(findmnt -rno TARGET "$dev" 2>/dev/null)
+            [ "${#targets[@]}" -gt 0 ] || targets=("$dev")
+
+            # ollama anchors HOME/OLLAMA_MODELS/cwd at /mnt/ollama-models and
+            # pins that subvol — stop it before unmounting.
+            for t in "${targets[@]}"; do
+                if [ "$t" = "/mnt/ollama-models" ] && systemctl is-active --quiet ollama 2>/dev/null; then
+                    sudo -n systemctl stop ollama 2>/dev/null \
+                        && notify "mount" "stopped ollama (pinned /mnt/ollama-models)"
+                    break
+                fi
+            done
+
+            if [ "${#targets[@]}" -eq 1 ] && udisksctl unmount -b "$dev" >/dev/null 2>&1; then
+                notify "mount" "unmounted $dev"          # clean USB-stick path (no sudo)
+            else
+                for t in "${targets[@]}"; do
+                    sudo -n umount "$t" 2>/dev/null || true
+                done
+                still=$(findmnt -rno TARGET "$dev" 2>/dev/null | paste -sd' ')
+                if [ -z "$still" ]; then
+                    notify "mount" "unmounted $dev (${#targets[@]} mount(s))"
+                else
+                    notify -u critical "mount" "still busy: $still"
+                fi
+            fi
+            ;;
+        *)
+            notify -u critical "mount" "unknown state: $state"
+            ;;
+    esac
+    exit 0
+}
+
 # --- top-level picker --------------------------------------------------------
+
+# Direct mode: `lister.sh <function>` jumps straight to a single lister and
+# exits, bypassing the Functions menu. Used by dedicated dwm keybinds (e.g.
+# MODKEY|Shift+m -> mount). With no arg we fall through to the interactive
+# Functions loop below.
+if [ "${1:-}" != "" ]; then
+    unset_gum
+    case "$1" in
+        run)    run_dmenu ;;
+        killer) run_killer ;;
+        pass)   run_pass ;;
+        wifi)   run_wifi ;;
+        blue)   run_blue ;;
+        mount)  run_mount ;;
+        *)      notify -u critical "lister" "unknown function: $1" ;;
+    esac
+    # Functions exit 0 on action; a Back/Esc/no-op returns here -> close.
+    exit 0
+fi
 
 # Main loop: after any lister returns (selection made, back picked, or Esc
 # cancelled), come back to the Functions picker. Exit only when the user
@@ -434,7 +589,7 @@ while :; do
     # sourced from a printf of the lister names. Icons are prefixed for
     # visual parity with the inner pickers.
     choice=$(tv \
-        --source-command "printf '%s\n'   run   killer   pass 󰖩  wifi   blue" \
+        --source-command "printf '%s\n'   run   killer   pass 󰖩  wifi   blue 󰋊  mount" \
         --input-header "Functions" \
         --no-sort) || exit 0
     [ -n "$choice" ] || exit 0
@@ -448,6 +603,7 @@ while :; do
         pass)   run_pass ;;
         wifi)   run_wifi ;;
         blue)   run_blue ;;
+        mount)  run_mount ;;
         *)      exit 0 ;;
     esac
     clear
