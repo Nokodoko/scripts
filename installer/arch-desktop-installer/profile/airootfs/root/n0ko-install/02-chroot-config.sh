@@ -115,12 +115,25 @@ ROOT_UUID="$(blkid -s UUID -o value /dev/disk/by-label/root 2>/dev/null || true)
 [[ -n "${ROOT_UUID}" ]] || die "Could not determine root partition UUID."
 log "Root UUID: ${ROOT_UUID}"
 
+# Pick whichever microcode image pacstrap installed (intel-ucode or amd-ucode)
+UCODE_LINE=""
+[[ -f /boot/amd-ucode.img ]]   && UCODE_LINE="initrd  /amd-ucode.img"
+[[ -f /boot/intel-ucode.img ]] && UCODE_LINE="initrd  /intel-ucode.img"
+log "Microcode initrd: ${UCODE_LINE:-(none found)}"
+
+# NVIDIA proprietary driver needs KMS enabled for a clean console/X handoff
+KERNEL_OPTS="root=UUID=${ROOT_UUID} rw quiet"
+if pacman -Qq nvidia &>/dev/null; then
+    KERNEL_OPTS+=" nvidia_drm.modeset=1"
+    log "NVIDIA driver installed — appending nvidia_drm.modeset=1"
+fi
+
 cat > /boot/loader/entries/arch.conf <<EOF
-title   Arch Linux (n0ko AMD Desktop)
+title   Arch Linux (n0ko)
 linux   /vmlinuz-linux
-initrd  /amd-ucode.img
+${UCODE_LINE}
 initrd  /initramfs-linux.img
-options root=UUID=${ROOT_UUID} rw quiet
+options ${KERNEL_OPTS}
 EOF
 
 log "Bootloader entries written."

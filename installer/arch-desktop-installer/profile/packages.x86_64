@@ -1,7 +1,7 @@
 alsa-utils
 amd-ucode
-arch-install-scripts
 archinstall
+arch-install-scripts
 b43-fwcutter
 base
 bcachefs-tools
@@ -31,6 +31,7 @@ f2fs-tools
 fatresize
 foot-terminfo
 fsarchiver
+git
 gpart
 gpm
 gptfdisk
@@ -76,15 +77,16 @@ nilfs-utils
 nmap
 ntfs-3g
 nvme-cli
-open-iscsi
-open-vm-tools
 openconnect
+open-iscsi
 openpgp-card-tools
 openssh
+open-vm-tools
 openvpn
-parted
 partclone
+parted
 partimage
+pciutils
 pcsclite
 ppp
 pptpclient
@@ -125,4 +127,3 @@ xdg-utils
 xfsprogs
 xl2tpd
 zsh
-git
