@@ -119,7 +119,8 @@ UCODE_LINE=""
 log "Microcode initrd: ${UCODE_LINE:-(none found)}"
 
 # NVIDIA proprietary driver needs KMS enabled for a clean console/X handoff
-KERNEL_OPTS="root=UUID=${ROOT_UUID} rw quiet"
+# no `quiet`: n0ko wants the kernel message scroll visible during boot
+KERNEL_OPTS="root=UUID=${ROOT_UUID} rw"
 if pacman -Qq nvidia &>/dev/null; then
     KERNEL_OPTS+=" nvidia_drm.modeset=1"
     log "NVIDIA driver installed — appending nvidia_drm.modeset=1"
