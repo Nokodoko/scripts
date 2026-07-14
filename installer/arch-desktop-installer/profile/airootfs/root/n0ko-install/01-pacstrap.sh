@@ -99,10 +99,27 @@ done
 
 log "Total packages to install: ${#ALL_PKGS[@]}"
 
+# ── Multilib guard ────────────────────────────────────────────────────────────
+# lib32-* packages need [multilib]. The airootfs ships a multilib-enabled
+# /etc/pacman.conf, but guard anyway in case this script runs from a stock ISO.
+if ! grep -q '^\[multilib\]' /etc/pacman.conf; then
+    log "Enabling [multilib] in live /etc/pacman.conf..."
+    sed -i '/^#\[multilib\]/,/^#Include/ s/^#//' /etc/pacman.conf
+    pacman -Sy 2>&1 | tee -a "${LOG_FILE}"
+fi
+
 # ── Pacstrap ─────────────────────────────────────────────────────────────────
 log "Running pacstrap... (this may take a while)"
 pacstrap -K /mnt "${ALL_PKGS[@]}" 2>&1 | tee -a "${LOG_FILE}"
 log "Pacstrap complete."
+
+# ── Enable multilib on the INSTALLED system ───────────────────────────────────
+# pacstrap writes a stock pacman.conf into /mnt; without this the first
+# pacman -Syu on the new system fails to find the installed lib32-* packages.
+if ! grep -q '^\[multilib\]' /mnt/etc/pacman.conf; then
+    log "Enabling [multilib] in /mnt/etc/pacman.conf..."
+    sed -i '/^#\[multilib\]/,/^#Include/ s/^#//' /mnt/etc/pacman.conf
+fi
 
 # ── Generate fstab ────────────────────────────────────────────────────────────
 log "Generating /mnt/etc/fstab..."
