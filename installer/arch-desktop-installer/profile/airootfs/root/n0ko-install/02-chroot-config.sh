@@ -69,11 +69,8 @@ echo "%wheel ALL=(ALL:ALL) ALL" > /etc/sudoers.d/wheel
 chmod 440 /etc/sudoers.d/wheel
 
 # ── Passwords ─────────────────────────────────────────────────────────────────
-log "Set root password:"
-passwd
-
-log "Set password for ${NEW_USER}:"
-passwd "${NEW_USER}"
+# Set NON-INTERACTIVELY by install.sh (Phase 2b) via chpasswd + verified with
+# `passwd -S`. Interactive passwd here proved skippable (cai, 2026-07-13).
 
 # ── mkinitcpio ───────────────────────────────────────────────────────────────
 # Use lewis's HOOKS but strip the Cirrus/CS35L41 laptop audio MODULES
