@@ -1,0 +1,22 @@
+# Packages excluded from pkgs-native.curated.txt
+# Format: package-name: reason
+
+# --- Laptop / ASUS-specific hardware ---
+acpi: laptop battery/AC adapter daemon — desktop has no need for ACPI lid/battery events
+cpupower: laptop CPU power management (P-states, frequency scaling for battery); desktop uses AMD default governors
+# asusctl: ASUS laptop daemon (fan curves, keyboard backlight, AniMe Matrix) — not present in pkgs-native.txt (AUR-only)
+# smu-guard: ASUS/AMD SMU guard for laptop power limits — not present in pkgs-native.txt (AUR-only)
+
+# --- GPU / display drivers for other platforms ---
+# xf86-video-*: no xf86-video-* packages were in pkgs-native.txt; kept vulkan-radeon + lib32-vulkan-radeon (correct for AMD desktop)
+# nvidia: not present in pkgs-native.txt
+# cuda: not present in pkgs-native.txt
+# intel-ucode: not in pkgs-native.txt; replaced by amd-ucode (already present in releng + added explicitly)
+
+# --- Audio hardware modules (Cirrus/CS35L41) ---
+# snd_hda_scodec_cs35l41_i2c, snd_hda_scodec_cs35l41, snd_soc_cs35l41_lib, cs_dsp, snd_soc_cs_amp_lib:
+#   mkinitcpio MODULES entries for ASUS laptop Cirrus CS35L41 amplifier codec.
+#   Stripped from 02-chroot-config.sh mkinitcpio configuration; not installed as packages.
+
+# --- AUR exclusions (pkgs-aur.curated.txt) ---
+# asusctl: ASUS laptop control daemon — AUR package, desktop irrelevant

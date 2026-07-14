@@ -1,0 +1,16 @@
+
+  ███╗   ██╗ ██████╗ ██╗  ██╗ ██████╗
+  ████╗  ██║██╔═══██╗██║ ██╔╝██╔═══██╗
+  ██╔██╗ ██║██║   ██║█████╔╝ ██║   ██║
+  ██║╚██╗██║██║   ██║██╔═██╗ ██║   ██║
+  ██║ ╚████║╚██████╔╝██║  ██╗╚██████╔╝
+  ╚═╝  ╚═══╝ ╚═════╝ ╚═╝  ╚═╝ ╚═════╝
+  AMD/ROCm Desktop Installer ISO
+
+  To begin installation:
+
+    /root/n0ko-install/install.sh
+
+  WARNING: The installer will partition and format the target disk.
+  Ensure you have selected the correct target before proceeding.
+
