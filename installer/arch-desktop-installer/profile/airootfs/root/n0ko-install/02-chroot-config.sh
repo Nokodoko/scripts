@@ -100,7 +100,9 @@ cat > /boot/loader/loader.conf <<EOF
 default arch.conf
 timeout 3
 console-mode auto
-editor no
+# editor yes: n0ko needs kernel-line editing at the boot menu for rescue
+# (init=/bin/bash). Physical access == root anyway on this desktop.
+editor yes
 EOF
 
 # Detect root partition UUID by label
